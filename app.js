@@ -19,7 +19,58 @@ function buildMeta(name,age,gender){
   return `${name} / ${gender} / ${age} нас / Тайлан авсан огноо: ${formatMongolianDate()}`;
 }
 
-const prompt=(name,age,gender)=>`Чи бол Сара нэртэй алганы хээ шинжээч. Монгол хэлээр дулаан, мэргэжлийн, давтагдалгүй тайлан бич. Зураг дээр харагдахгүй зүйлийг баттай мэт зохиохгүй, "ерөнхий ажиглалтаар" гэж болгоомжтой хэл. Хариултыг зөвхөн JSON хэлбэрээр өг. Нэр: ${name}, Нас: ${age}, Хүйс: ${gender}. JSON бүтэц: {"summary":"ерөнхий 5-7 өгүүлбэр", "lineNotes":{"heart":"зүрхний шугамын 2-3 өгүүлбэр", "head":"толгойн шугамын 2-3 өгүүлбэр", "life":"амьдралын шугамын 2-3 өгүүлбэр", "fate":"хувь заяаны шугамын 2-3 өгүүлбэр", "sun":"нарны шугамын 2-3 өгүүлбэр"}, "scores":{"Хайр дурлал":88,"Санхүү":76,"Карьер":82,"Эрүүл мэнд":79,"Тогтвортой байдал":84}, "timeline":[{"age":"Одоо - ${age} нас","text":"...","advice":"..."},{"age":"${Number(age)+1} - ${Number(age)+2} нас","text":"...","advice":"..."},{"age":"${Number(age)+3} - ${Number(age)+4} нас","text":"...","advice":"..."}], "sections":[{"title":"Ерөнхий дүр зураг","body":"120-180 үг"},{"title":"Зан чанар","body":"120-180 үг"},{"title":"Хайр дурлал","body":"120-180 үг"},{"title":"Ажил мэргэжил","body":"120-180 үг"},{"title":"Мөнгө санхүү","body":"120-180 үг"},{"title":"Эрүүл мэндийн хандлага","body":"Эмнэлгийн онош биш, уламжлалт тайлалын хүрээнд 100-150 үг"},{"title":"Давуу тал","body":"100-150 үг"},{"title":"Анхаарах зүйл","body":"100-150 үг"},{"title":"3 жилийн ерөнхий төлөв","body":"150-220 үг"},{"title":"Сарагийн хувийн зөвлөгөө","body":"120-180 үг"}], "quote":"богино урамтай ишлэл"}`;
+const prompt=(name,age,gender)=>`Чи бол Сара нэртэй алганы хээ шинжээч. Монгол хэлээр дулаан, мэргэжлийн, давтагдалгүй, арилжааны чанартай маш дэлгэрэнгүй тайлан бич. Зураг дээр харагдахгүй зүйлийг баттай мэт зохиохгүй, "ерөнхий ажиглалтаар", "харагдах байдлаар", "болгоомжтой тайлбарлавал" гэж хэл. Хариултыг зөвхөн JSON хэлбэрээр өг. Нэр: ${name}, Нас: ${age}, Хүйс: ${gender}.
+
+JSON бүтэц яг ийм байна:
+{
+ "summary":"ерөнхий 10-14 өгүүлбэртэй, хувь хүний онцлогтой дэлгэрэнгүй дүгнэлт",
+ "lineNotes":{"heart":"зүрхний шугам 4-6 өгүүлбэр", "head":"толгойн шугам 4-6 өгүүлбэр", "life":"амьдралын шугам 4-6 өгүүлбэр", "fate":"хувь заяаны шугам 4-6 өгүүлбэр", "sun":"нарны шугам 4-6 өгүүлбэр"},
+ "scores":{"Хайр дурлал":88,"Санхүү":76,"Карьер":82,"Эрүүл мэнд":79,"Тогтвортой байдал":84},
+ "timeline":[
+  {"age":"Одоо - ${age} нас","text":"дэлгэрэнгүй 5-7 өгүүлбэр","advice":"3-5 өгүүлбэр зөвлөгөө"},
+  {"age":"${Number(age)+1} - ${Number(age)+2} нас","text":"дэлгэрэнгүй 5-7 өгүүлбэр","advice":"3-5 өгүүлбэр зөвлөгөө"},
+  {"age":"${Number(age)+3} - ${Number(age)+4} нас","text":"дэлгэрэнгүй 5-7 өгүүлбэр","advice":"3-5 өгүүлбэр зөвлөгөө"}
+ ],
+ "sections":[
+  {"title":"Ерөнхий дүр зураг","body":"180-260 үг"},
+  {"title":"Зүүн гарын уншлага","body":"160-240 үг"},
+  {"title":"Баруун гарын уншлага","body":"160-240 үг"},
+  {"title":"Хоёр гарын ялгаа","body":"160-240 үг"},
+  {"title":"Амьдралын шугам","body":"180-260 үг"},
+  {"title":"Толгойн шугам","body":"180-260 үг"},
+  {"title":"Зүрхний шугам","body":"180-260 үг"},
+  {"title":"Хувь заяаны шугам","body":"180-260 үг"},
+  {"title":"Нарны шугам","body":"150-220 үг"},
+  {"title":"Меркурийн шугам","body":"150-220 үг"},
+  {"title":"Мөнгөний шугам ба мөнгөний урсгал","body":"180-260 үг"},
+  {"title":"Ажил, карьерын чиглэл","body":"180-260 үг"},
+  {"title":"Бизнес, хөрөнгө оруулалтын хандлага","body":"160-240 үг"},
+  {"title":"Хайр дурлалын ерөнхий төлөв","body":"180-260 үг"},
+  {"title":"Ханийн заяа ба гэр бүлийн өнгө","body":"160-240 үг"},
+  {"title":"Харилцааны давтагдах хичээл","body":"150-220 үг"},
+  {"title":"Гэр бүл, үр хүүхдийн заяаны өнгө","body":"150-220 үг"},
+  {"title":"Эрүүл мэндийн хандлага","body":"Эмнэлгийн онош биш гэдгийг заавал дурьдаж 160-230 үг"},
+  {"title":"Сэтгэлийн тэнцвэр ба дотоод хүч","body":"150-220 үг"},
+  {"title":"Авьяас, төрөлхийн өгөгдөл","body":"160-240 үг"},
+  {"title":"Давуу талууд","body":"150-220 үг"},
+  {"title":"Анхаарах сул талууд","body":"150-220 үг"},
+  {"title":"Аз хийморь, боломжийн хаалга","body":"150-220 үг"},
+  {"title":"Нүүдэл суудал, орчны өөрчлөлт","body":"140-210 үг"},
+  {"title":"Суралцах, шалгалт, мэргэжлийн өсөлт","body":"140-210 үг"},
+  {"title":"Бичиг баримт, шийдвэр гаргалт","body":"140-210 үг"},
+  {"title":"Ойрын 1 жилийн төлөв","body":"160-240 үг"},
+  {"title":"Ойрын 2 дахь жилийн төлөв","body":"160-240 үг"},
+  {"title":"Ойрын 3 дахь жилийн төлөв","body":"160-240 үг"},
+  {"title":"Санхүүгийн зөв дадал","body":"150-220 үг"},
+  {"title":"Харилцаанд баримтлах зарчим","body":"150-220 үг"},
+  {"title":"Өөрийгөө хамгаалах зөвлөгөө","body":"140-210 үг"},
+  {"title":"Сарагийн хувийн зөвлөгөө","body":"180-260 үг"},
+  {"title":"Эцсийн дүгнэлт","body":"180-260 үг"}
+ ],
+ "quote":"богино, гүн утгатай урам өгөх ишлэл"
+}
+
+Заавар: sections бүрийн өгүүлбэрүүд давтагдахгүй. Нэг ижил санааг олон удаа бүү давт. Хүн бүрт зориулсан мэт, нэрийг нь зарим хэсэгт зөөлөн ашигла. Тайлан урт, нягт, төлбөртэй үйлчилгээний үнэ цэнтэй байх ёстой.`;
 async function startAnalysis(){hideError();const name=$('name').value.trim(),age=$('age').value,gender=$('gender').value;show('loading');const timer=loadingAnim();try{const res=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt(name,age,gender)},{inline_data:{mime_type:state.leftType,data:state.leftData}},{inline_data:{mime_type:state.rightType,data:state.rightData}}]}],generationConfig:{temperature:.65,maxOutputTokens:8192,response_mime_type:'application/json'}})});const data=await res.json();if(!res.ok){
   const msg=data.error?.message||'AI холболтын алдаа';
   if(msg.toLowerCase().includes('leak') || msg.toLowerCase().includes('api key')){
@@ -34,9 +85,43 @@ function renderScores(scores={}){const colors=['#ef5b5b','#2aa66a','#2f8ccf','#8
 function renderTimeline(arr=[]){$('timeline').innerHTML=arr.slice(0,3).map(t=>`<div class="timebox"><h3>${t.age||''}</h3><p>${t.text||''}</p><small><b>Зөвлөмж</b><br>${t.advice||''}</small></div>`).join('')}
 function renderSections(arr=[],summary=''){let html=summary?`<article class="section report-page"><h2>Ерөнхий дүгнэлт</h2><p>${summary}</p></article>`:'';html+=arr.map(s=>`<article class="section report-page"><h2>${s.title}</h2><p>${s.body}</p></article>`).join('');$('sections').innerHTML=html;}
 function showError(msg){$('error').style.display='block';$('error').textContent=msg}function hideError(){$('error').style.display='none'}function resetApp(){location.reload()}
-function downloadPDF(){
-  document.body.classList.add('print-report-mode');
-  setTimeout(()=>window.print(),120);
+async function downloadPDF(){
+  const report=$('report');
+  if(!report){showError('PDF үүсгэх тайлан олдсонгүй');return;}
+  const oldText=document.querySelector('.result-actions');
+  if(oldText) oldText.style.display='none';
+  try{
+    const canvas=await html2canvas(report,{scale:1.35,useCORS:true,allowTaint:true,backgroundColor:'#faf8f4',scrollX:0,scrollY:0,windowWidth:report.scrollWidth,windowHeight:report.scrollHeight});
+    const img=canvas.toDataURL('image/jpeg',0.92);
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','mm','a4');
+    const pageW=210;
+    const pageH=297;
+    const margin=0;
+    const imgW=pageW-(margin*2);
+    const imgH=canvas.height*imgW/canvas.width;
+    let y=margin;
+    pdf.addImage(img,'JPEG',margin,y,imgW,imgH);
+    let remaining=imgH-pageH;
+    while(remaining>0){
+      y-=pageH;
+      pdf.addPage();
+      pdf.addImage(img,'JPEG',margin,y,imgW,imgH);
+      remaining-=pageH;
+    }
+    const total=pdf.getNumberOfPages();
+    for(let i=1;i<=total;i++){
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(120,120,120);
+      pdf.text(`Системийн зохиогч: Л.Батцог · ${i}/${total}`,105,292,{align:'center'});
+    }
+    pdf.save('sara-palm-report.pdf');
+  }catch(e){
+    showError('PDF үүсгэхэд алдаа гарлаа: '+e.message);
+  }finally{
+    if(oldText) oldText.style.display='flex';
+  }
 }
-window.addEventListener('afterprint',()=>document.body.classList.remove('print-report-mode'));
+
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
