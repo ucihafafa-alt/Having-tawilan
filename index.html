@@ -72,23 +72,13 @@
             <div class="hand-title">Зүүн гар</div>
             <img id="leftPrev" class="preview" alt="Зүүн гар">
             <div class="empty">✋<br>Зураг оруулна уу</div>
-            <input id="leftGallery" type="file" accept="image/*" style="display:none" onchange="loadImage('left',this)">
-            <input id="leftCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="loadImage('left',this)">
-            <div class="upload-actions">
-              <button type="button" onclick="document.getElementById('leftGallery').click()">📁 Галлерей</button>
-              <button type="button" onclick="document.getElementById('leftCamera').click()">📷 Камер</button>
-            </div>
+            <div class="upload-actions"><label>Галлерей<input type="file" accept="image/*" onchange="loadImage('left',this)"></label><label>Камер<input type="file" accept="image/*" capture="environment" onchange="loadImage('left',this)"></label></div>
           </div>
           <div class="upload-card" id="rightCard">
             <div class="hand-title">Баруун гар</div>
             <img id="rightPrev" class="preview" alt="Баруун гар">
             <div class="empty">🖐<br>Зураг оруулна уу</div>
-            <input id="rightGallery" type="file" accept="image/*" style="display:none" onchange="loadImage('right',this)">
-            <input id="rightCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="loadImage('right',this)">
-            <div class="upload-actions">
-              <button type="button" onclick="document.getElementById('rightGallery').click()">📁 Галлерей</button>
-              <button type="button" onclick="document.getElementById('rightCamera').click()">📷 Камер</button>
-            </div>
+            <div class="upload-actions"><label>Галлерей<input type="file" accept="image/*" onchange="loadImage('right',this)"></label><label>Камер<input type="file" accept="image/*" capture="environment" onchange="loadImage('right',this)"></label></div>
           </div>
         </div>
         <button id="analyzeBtn" class="primary" disabled>AI тайлан гаргах</button>

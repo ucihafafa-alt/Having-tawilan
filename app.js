@@ -47,47 +47,143 @@ function renderSections(arr=[],summary=''){let html=summary?`<article class="sec
 function showError(msg){$('error').style.display='block';$('error').textContent=msg}function hideError(){$('error').style.display='none'}function resetApp(){location.reload()}
 
 async function downloadPDF(){
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF('p','mm','a4');
-  const pageW=210, pageH=297;
-  const report=$('report');
-  const meta=$('meta')?.textContent || '';
-  const pages=[];
-  const makePage=(title, nodes, extraClass='')=>{
-    const page=document.createElement('div');
-    page.className='pdf-build-page '+extraClass;
-    const content=document.createElement('div');
-    content.className='pdf-content';
-    if(title){const h=document.createElement('div');h.className='pdf-title';h.textContent=title;content.appendChild(h);}
-    nodes.forEach(n=>content.appendChild(n.cloneNode(true)));
-    const foot=document.createElement('div');
-    foot.className='pdf-footer';
-    foot.innerHTML='<span>Системийн зохиогч: Л.Батцог</span><span></span>';
-    page.appendChild(content); page.appendChild(foot);
-    document.body.appendChild(page); pages.push(page);
-  };
-  const cover=document.createElement('div');
-  cover.className='pdf-build-page';
-  cover.innerHTML=`<div class="pdf-cover"><h1>Хувь Тавилангийн Хээ</h1><img src="sara.jpg"><p>Сарагийн алганы хээний дэлгэрэнгүй тайлан</p><p>${meta}</p></div><div class="pdf-footer"><span>Системийн зохиогч: Л.Батцог</span><span>Нүүр</span></div>`;
-  document.body.appendChild(cover); pages.push(cover);
-  const palm=document.querySelector('.palm-card'); if(palm) makePage('Алганы шугамын зураглал',[palm]);
-  const score=document.querySelector('.score-card'); if(score) makePage('Ерөнхий төлөвийн оноо',[score]);
-  const timeline=document.querySelector('.timeline-card'); if(timeline) makePage('Амьдралын үе шат',[timeline]);
-  document.querySelectorAll('#sections .section').forEach(sec=>makePage('',[sec]));
-  const quote=$('quote'); if(quote) makePage('Сарагийн үг',[quote]);
-  try{
-    for(let i=0;i<pages.length;i++){
-      pages[i].querySelector('.pdf-footer span:last-child').textContent=(i+1)+' / '+pages.length;
-      const canvas=await html2canvas(pages[i],{scale:1.6,useCORS:true,backgroundColor:'#fffdf9',logging:false});
-      const img=canvas.toDataURL('image/jpeg',0.92);
-      if(i>0) pdf.addPage();
-      pdf.addImage(img,'JPEG',0,0,pageW,pageH,undefined,'FAST');
-    }
-    const filename=(($('name')?.value||'sara').trim()||'sara').replace(/[\/:*?"<>|]/g,'')+'-palm-report.pdf';
-    pdf.save(filename);
-  }finally{
-    pages.forEach(p=>p.remove());
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p','mm','a4');
+  const pageW = 210, pageH = 297;
+  const margin = 16;
+  const maxW = pageW - margin * 2;
+  let y = margin;
+  const name = ($('name')?.value || 'sara').trim() || 'sara';
+  const meta = $('meta')?.textContent || '';
+
+  function addFooter(){
+    pdf.setFontSize(9);
+    pdf.setTextColor(120,130,126);
+    pdf.text('Системийн зохиогч: Л.Батцог', margin, pageH - 10);
+    pdf.text(String(pdf.getNumberOfPages()), pageW - margin, pageH - 10, {align:'right'});
   }
+  function newPage(){
+    addFooter();
+    pdf.addPage();
+    y = margin;
+  }
+  function safeText(txt){
+    return String(txt || '').replace(/\s+\n/g,'\n').trim();
+  }
+  function title(t){
+    if(y > pageH - 45) newPage();
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(17);
+    pdf.setTextColor(23,63,58);
+    const lines = pdf.splitTextToSize(safeText(t), maxW);
+    pdf.text(lines, margin, y);
+    y += lines.length * 7 + 4;
+  }
+  function para(t, size=12){
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(size);
+    pdf.setTextColor(45,61,57);
+    const lines = pdf.splitTextToSize(safeText(t), maxW);
+    for(const line of lines){
+      if(y > pageH - 22) newPage();
+      pdf.text(line, margin, y);
+      y += 6.2;
+    }
+    y += 3;
+  }
+  function card(label, text){
+    if(y > pageH - 55) newPage();
+    pdf.setFillColor(246,250,248);
+    pdf.setDrawColor(220,232,227);
+    pdf.roundedRect(margin, y-2, maxW, 34, 3, 3, 'FD');
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(12);
+    pdf.setTextColor(28,117,104);
+    pdf.text(safeText(label), margin+5, y+7);
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(10.5);
+    pdf.setTextColor(55,75,70);
+    const lines=pdf.splitTextToSize(safeText(text), maxW-10).slice(0,3);
+    pdf.text(lines, margin+5, y+16);
+    y += 39;
+  }
+
+  // Cover
+  pdf.setFillColor(250,248,244);
+  pdf.rect(0,0,pageW,pageH,'F');
+  pdf.setTextColor(23,63,58);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(28);
+  pdf.text('Хувь Тавилангийн Хээ', pageW/2, 42, {align:'center'});
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(14);
+  pdf.text('Сарагийн алганы хээний дэлгэрэнгүй тайлан', pageW/2, 54, {align:'center'});
+  try{
+    const sara = document.querySelector('img.sara') || document.querySelector('img[src="sara.jpg"]');
+    if(sara) pdf.addImage(sara, 'JPEG', 75, 68, 60, 60, undefined, 'FAST');
+  }catch(e){}
+  pdf.setFontSize(12);
+  pdf.text(meta || buildMeta(name, $('age')?.value || '', $('gender')?.value || ''), pageW/2, 145, {align:'center', maxWidth:160});
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(13);
+  pdf.text('Алганы шугам, ерөнхий төлөв, амьдралын үе шат, хайр, ажил, санхүүгийн тайлал', pageW/2, 170, {align:'center', maxWidth:165});
+  addFooter();
+  pdf.addPage(); y = margin;
+
+  // Palm image page
+  title('Алганы шугамын зураглал');
+  try{
+    const canvas = $('palmCanvas');
+    if(canvas && canvas.width){
+      const img = canvas.toDataURL('image/jpeg',0.92);
+      const imgW = maxW;
+      const imgH = Math.min(130, canvas.height * imgW / canvas.width);
+      pdf.addImage(img,'JPEG',margin,y,imgW,imgH,undefined,'FAST');
+      y += imgH + 8;
+    }
+  }catch(e){}
+  const legends = [
+    ['1. Зүрхний шугам', $('l1')?.textContent],
+    ['2. Толгойн шугам', $('l2')?.textContent],
+    ['3. Амьдралын шугам', $('l3')?.textContent],
+    ['4. Хувь заяаны шугам', $('l4')?.textContent],
+    ['5. Нарны шугам', $('l5')?.textContent],
+  ];
+  legends.forEach(([a,b])=>card(a,b));
+
+  // Scores
+  newPage();
+  title('Ерөнхий төлөвийн оноо');
+  document.querySelectorAll('#scores .score').forEach((el)=>{
+    const b = el.querySelector('b')?.textContent || '';
+    const v = el.querySelector('.ring')?.getAttribute('data-val') || '';
+    const sm = el.querySelector('small')?.textContent || '';
+    card(b + (v ? ' — '+v+'%' : ''), sm);
+  });
+
+  // Timeline
+  title('Амьдралын үе шат');
+  document.querySelectorAll('#timeline .timebox').forEach(el=>{
+    const h = el.querySelector('h3')?.textContent || '';
+    const p = el.querySelector('p')?.textContent || '';
+    const sm = el.querySelector('small')?.textContent || '';
+    card(h, p + '\n' + sm);
+  });
+
+  // Sections
+  document.querySelectorAll('#sections .section').forEach(sec=>{
+    const h = sec.querySelector('h2')?.textContent || '';
+    const body = sec.querySelector('p')?.textContent || sec.textContent || '';
+    newPage();
+    title(h);
+    para(body, 12);
+  });
+
+  const q = $('quote')?.textContent;
+  if(q){ newPage(); title('Сарагийн үг'); para(q, 14); }
+  addFooter();
+  const filename=(name+'-palm-report.pdf').replace(/[\/:*?"<>|]/g,'');
+  pdf.save(filename);
 }
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
