@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
 <title>Хувь Тавилангийн Хээ — Сара</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -83,7 +85,7 @@ body:after{content:"";position:fixed;inset:0;background-image:linear-gradient(rg
   </section>
 </div>
 <script>
-const KEY='AQ.Ab8RN6JJv-0ayx3HI3VTWN7pPdoWtUjKR39ycVDepnalJu1Oyw';
+const KEY='AIzaSyDpG0QJtE6XfnucaHJPhlJQSgxdLEsbSkg';
 const API='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+KEY;
 const S={lb:null,rb:null,lt:null,rt:null,raw:''};
 const SECS=[
@@ -160,5 +162,6 @@ function palmSvg(type){const colors={life:'#a7d6be',head:'#9ac7ff',heart:'#eab0a
 function render(text,name,age,gender){document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));document.getElementById('s3').classList.add('active');document.getElementById('rMeta').textContent=`${name} • ${age} нас • ${gender} • ${new Date().toLocaleDateString('mn-MN')}`;document.getElementById('printMeta').textContent=`${name} • ${age} нас • ${gender}`;renderScores(name);renderTimeline(name,age);const wrap=document.getElementById('cards');wrap.innerHTML='';SECS.forEach((s,i)=>{let si=text.search(new RegExp(s.k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'));if(si<0)return;let ei=text.length;if(SECS[i+1]){let ni=text.search(new RegExp(SECS[i+1].k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'));if(ni>si)ei=ni}let body=text.slice(si+s.k.length,ei).replace(/^\s*[\d.\-–—:]+\s*/,'').trim();let card=document.createElement('article');card.className='card';card.innerHTML=`<div class="chead"><div class="cico">${s.i}</div><div class="cttl">${s.k}</div></div><div class="visual">${palmSvg(s.line)}<div class="vtext">${s.v}</div></div><div class="cbody">${body.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')}</div>`;wrap.appendChild(card)});if(!wrap.children.length){wrap.innerHTML=`<article class="card show"><div class="cbody">${text.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')}</div></article>`}wrap.querySelectorAll('.card').forEach((c,i)=>setTimeout(()=>c.classList.add('show'),80*i));scrollTo({top:0,behavior:'smooth'});}
 function resetAll(){S.lb=S.rb=S.lt=S.rt=null;['lCard','rCard'].forEach(id=>document.getElementById(id).classList.remove('filled'));['lPrev','rPrev'].forEach(id=>document.getElementById(id).src='');document.querySelectorAll('input[type=file]').forEach(i=>i.value='');document.getElementById('goBtn').disabled=true;showStep(1)}
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
 </body>
 </html>
