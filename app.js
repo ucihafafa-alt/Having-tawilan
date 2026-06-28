@@ -19,65 +19,25 @@ function buildMeta(name,age,gender){
   return `${name} / ${gender} / ${age} нас / Тайлан авсан огноо: ${formatMongolianDate()}`;
 }
 
-const prompt=(name,age,gender)=>`Чи бол Сара нэртэй алганы хээ шинжээч. Монгол хэлээр дулаан, мэргэжлийн, давтагдалгүй, арилжааны чанартай маш дэлгэрэнгүй тайлан бич. Зураг дээр харагдахгүй зүйлийг баттай мэт зохиохгүй, "ерөнхий ажиглалтаар", "харагдах байдлаар", "болгоомжтой тайлбарлавал" гэж хэл. Хариултыг зөвхөн JSON хэлбэрээр өг. Нэр: ${name}, Нас: ${age}, Хүйс: ${gender}.
+const prompt=(name,age,gender)=>`Чи бол Сара нэртэй алганы хээ шинжээч. Монгол хэлээр дулаан, мэргэжлийн, давтагдалгүй тайлан бич. Зураг дээр харагдахгүй зүйлийг баттай мэт зохиохгүй, "ерөнхий ажиглалтаар" гэж болгоомжтой хэл. Хариултыг зөвхөн JSON хэлбэрээр өг. Нэр: ${name}, Нас: ${age}, Хүйс: ${gender}. JSON бүтэц: {"summary":"ерөнхий 5-7 өгүүлбэр", "lineNotes":{"heart":"зүрхний шугамын 2-3 өгүүлбэр", "head":"толгойн шугамын 2-3 өгүүлбэр", "life":"амьдралын шугамын 2-3 өгүүлбэр", "fate":"хувь заяаны шугамын 2-3 өгүүлбэр", "sun":"нарны шугамын 2-3 өгүүлбэр"}, "scores":{"Хайр дурлал":88,"Санхүү":76,"Карьер":82,"Эрүүл мэнд":79,"Тогтвортой байдал":84}, "timeline":[{"age":"Одоо - ${age} нас","text":"...","advice":"..."},{"age":"${Number(age)+1} - ${Number(age)+2} нас","text":"...","advice":"..."},{"age":"${Number(age)+3} - ${Number(age)+4} нас","text":"...","advice":"..."}], "sections":[{"title":"Ерөнхий дүр зураг","body":"180-250 үг"},{"title":"Зан чанар","body":"160-220 үг"},{"title":"Дотоод хүч ба төвлөрөл","body":"140-200 үг"},{"title":"Хайр дурлал","body":"160-220 үг"},{"title":"Ханийн заяа","body":"140-200 үг"},{"title":"Гэр бүл, харилцаа","body":"140-200 үг"},{"title":"Ажил мэргэжил","body":"160-230 үг"},{"title":"Бизнесийн боломж","body":"140-200 үг"},{"title":"Мөнгө санхүү","body":"160-230 үг"},{"title":"Мөнгө тогтоох хандлага","body":"140-200 үг"},{"title":"Эрүүл мэндийн хандлага","body":"Эмнэлгийн онош биш, уламжлалт тайлалын хүрээнд 130-190 үг"},{"title":"Давуу тал","body":"130-190 үг"},{"title":"Сул тал ба анхаарах зүйл","body":"130-190 үг"},{"title":"Аз хийморийн ерөнхий өнгө","body":"130-190 үг"},{"title":"Амьдралын 3 жилийн төлөв","body":"180-260 үг"},{"title":"2026 оны чиглэл","body":"130-190 үг"},{"title":"2027 оны чиглэл","body":"130-190 үг"},{"title":"2028 оны чиглэл","body":"130-190 үг"},{"title":"Сарагийн хувийн зөвлөгөө","body":"160-230 үг"},{"title":"Эцсийн дүгнэлт","body":"160-230 үг"}], "quote":"богино урамтай ишлэл"}`;
 
-JSON бүтэц яг ийм байна:
-{
- "summary":"ерөнхий 10-14 өгүүлбэртэй, хувь хүний онцлогтой дэлгэрэнгүй дүгнэлт",
- "lineNotes":{"heart":"зүрхний шугам 4-6 өгүүлбэр", "head":"толгойн шугам 4-6 өгүүлбэр", "life":"амьдралын шугам 4-6 өгүүлбэр", "fate":"хувь заяаны шугам 4-6 өгүүлбэр", "sun":"нарны шугам 4-6 өгүүлбэр"},
- "scores":{"Хайр дурлал":88,"Санхүү":76,"Карьер":82,"Эрүүл мэнд":79,"Тогтвортой байдал":84},
- "timeline":[
-  {"age":"Одоо - ${age} нас","text":"дэлгэрэнгүй 5-7 өгүүлбэр","advice":"3-5 өгүүлбэр зөвлөгөө"},
-  {"age":"${Number(age)+1} - ${Number(age)+2} нас","text":"дэлгэрэнгүй 5-7 өгүүлбэр","advice":"3-5 өгүүлбэр зөвлөгөө"},
-  {"age":"${Number(age)+3} - ${Number(age)+4} нас","text":"дэлгэрэнгүй 5-7 өгүүлбэр","advice":"3-5 өгүүлбэр зөвлөгөө"}
- ],
- "sections":[
-  {"title":"Ерөнхий дүр зураг","body":"180-260 үг"},
-  {"title":"Зүүн гарын уншлага","body":"160-240 үг"},
-  {"title":"Баруун гарын уншлага","body":"160-240 үг"},
-  {"title":"Хоёр гарын ялгаа","body":"160-240 үг"},
-  {"title":"Амьдралын шугам","body":"180-260 үг"},
-  {"title":"Толгойн шугам","body":"180-260 үг"},
-  {"title":"Зүрхний шугам","body":"180-260 үг"},
-  {"title":"Хувь заяаны шугам","body":"180-260 үг"},
-  {"title":"Нарны шугам","body":"150-220 үг"},
-  {"title":"Меркурийн шугам","body":"150-220 үг"},
-  {"title":"Мөнгөний шугам ба мөнгөний урсгал","body":"180-260 үг"},
-  {"title":"Ажил, карьерын чиглэл","body":"180-260 үг"},
-  {"title":"Бизнес, хөрөнгө оруулалтын хандлага","body":"160-240 үг"},
-  {"title":"Хайр дурлалын ерөнхий төлөв","body":"180-260 үг"},
-  {"title":"Ханийн заяа ба гэр бүлийн өнгө","body":"160-240 үг"},
-  {"title":"Харилцааны давтагдах хичээл","body":"150-220 үг"},
-  {"title":"Гэр бүл, үр хүүхдийн заяаны өнгө","body":"150-220 үг"},
-  {"title":"Эрүүл мэндийн хандлага","body":"Эмнэлгийн онош биш гэдгийг заавал дурьдаж 160-230 үг"},
-  {"title":"Сэтгэлийн тэнцвэр ба дотоод хүч","body":"150-220 үг"},
-  {"title":"Авьяас, төрөлхийн өгөгдөл","body":"160-240 үг"},
-  {"title":"Давуу талууд","body":"150-220 үг"},
-  {"title":"Анхаарах сул талууд","body":"150-220 үг"},
-  {"title":"Аз хийморь, боломжийн хаалга","body":"150-220 үг"},
-  {"title":"Нүүдэл суудал, орчны өөрчлөлт","body":"140-210 үг"},
-  {"title":"Суралцах, шалгалт, мэргэжлийн өсөлт","body":"140-210 үг"},
-  {"title":"Бичиг баримт, шийдвэр гаргалт","body":"140-210 үг"},
-  {"title":"Ойрын 1 жилийн төлөв","body":"160-240 үг"},
-  {"title":"Ойрын 2 дахь жилийн төлөв","body":"160-240 үг"},
-  {"title":"Ойрын 3 дахь жилийн төлөв","body":"160-240 үг"},
-  {"title":"Санхүүгийн зөв дадал","body":"150-220 үг"},
-  {"title":"Харилцаанд баримтлах зарчим","body":"150-220 үг"},
-  {"title":"Өөрийгөө хамгаалах зөвлөгөө","body":"140-210 үг"},
-  {"title":"Сарагийн хувийн зөвлөгөө","body":"180-260 үг"},
-  {"title":"Эцсийн дүгнэлт","body":"180-260 үг"}
- ],
- "quote":"богино, гүн утгатай урам өгөх ишлэл"
+function parseAiReport(txt,name,age,gender){
+  txt=(txt||'').replace(/```json|```/g,'').trim();
+  try{return JSON.parse(txt)}catch(e){}
+  const first=txt.indexOf('{'), last=txt.lastIndexOf('}');
+  if(first>=0 && last>first){
+    const cut=txt.slice(first,last+1);
+    try{return JSON.parse(cut)}catch(e){}
+  }
+  return fallbackReport(name,age,gender,txt);
 }
-
-Заавар: sections бүрийн өгүүлбэрүүд давтагдахгүй. Нэг ижил санааг олон удаа бүү давт. Хүн бүрт зориулсан мэт, нэрийг нь зарим хэсэгт зөөлөн ашигла. Тайлан урт, нягт, төлбөртэй үйлчилгээний үнэ цэнтэй байх ёстой.`;
 async function startAnalysis(){hideError();const name=$('name').value.trim(),age=$('age').value,gender=$('gender').value;show('loading');const timer=loadingAnim();try{const res=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt(name,age,gender)},{inline_data:{mime_type:state.leftType,data:state.leftData}},{inline_data:{mime_type:state.rightType,data:state.rightData}}]}],generationConfig:{temperature:.65,maxOutputTokens:8192,response_mime_type:'application/json'}})});const data=await res.json();if(!res.ok){
   const msg=data.error?.message||'AI холболтын алдаа';
   if(msg.toLowerCase().includes('leak') || msg.toLowerCase().includes('api key')){
     localStorage.removeItem('GEMINI_API_KEY');
   }
   throw new Error(msg);
-}let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';txt=txt.replace(/```json|```/g,'').trim();let report;try{report=JSON.parse(txt)}catch(e){report=fallbackReport(name,age,gender,txt)}clearInterval(timer);renderReport(report,name,age,gender);show('result');}catch(e){clearInterval(timer);show('start');showError('Алдаа: '+e.message);}}
+}let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';txt=txt.replace(/```json|```/g,'').trim();let report=parseAiReport(txt,name,age,gender)clearInterval(timer);renderReport(report,name,age,gender);show('result');}catch(e){clearInterval(timer);show('start');showError('Алдаа: '+e.message);}}
 function fallbackReport(name,age,gender,txt){return{summary:txt||`${name} таны алганы ерөнхий хэлбэрээс тогтвортой, бодитой, мэдрэмжтэй зан төлөв ажиглагдаж байна.`,lineNotes:{heart:'Сэтгэлийн илэрхийлэл тогтуун, харилцаанд үнэнч байдлыг эрхэмлэх хандлагатай.',head:'Бодол санаа практик, шийдвэр гаргахдаа ажиглаж тунгаах тал давамгай.',life:'Амьдралын хэмнэл тогтвортой, хүчээ зөв хуваарилах хэрэгтэй.',fate:'Зорилгоо тодруулбал ажил, санхүүгийн зам илүү цэгцтэй болно.',sun:'Авьяас чадвар аажмаар тодрох шинжтэй.'},scores:{'Хайр дурлал':88,'Санхүү':78,'Карьер':84,'Эрүүл мэнд':76,'Тогтвортой байдал':82},timeline:[{age:`Одоо - ${age} нас`,text:'Одоо байгаа сонголтоо цэгцлэх үе.',advice:'Дотоод хүчээ зөв зүйлд чиглүүл.'},{age:`${+age+1} - ${+age+2} нас`,text:'Ажил, санхүү, харилцаанд шинэ боломж нэмэгдэнэ.',advice:'Шинэ төлөвлөгөөнд зоригтой ор.'},{age:`${+age+3} - ${+age+4} нас`,text:'Өмнөх хөдөлмөрийн үр дүн тогтох үе.',advice:'Тогтвортой систем бүтээ.'}],sections:[{title:'Ерөнхий дүр зураг',body:txt||'Таны хоёр гарын ерөнхий хэлбэр, үндсэн шугамуудын байрлал нь бодитой, мэдрэмжтэй, хариуцлагатай хандлагыг илтгэнэ.'},{title:'Сарагийн хувийн зөвлөгөө',body:'Өөрийн замаа яаралгүй, гэхдээ итгэлтэйгээр бүтээ. Төлөвлөгөө, сахилга бат, харилцааны үнэнч байдал таны гол түлхүүр байна.'}],quote:'Алга тань таны замын газрын зураг юм.'}}
 function renderReport(r,name,age,gender){$('meta').textContent=buildMeta(name,age,gender);drawPalm();$('l1').textContent=r.lineNotes?.heart||'';$('l2').textContent=r.lineNotes?.head||'';$('l3').textContent=r.lineNotes?.life||'';$('l4').textContent=r.lineNotes?.fate||'';$('l5').textContent=r.lineNotes?.sun||'';renderScores(r.scores);renderTimeline(r.timeline);renderSections(r.sections,r.summary);$('quote').textContent='“'+(r.quote||'Алганы хээ бол таны амьдралын газрын зураг юм.')+'”';}
 function drawPalm(){const canvas=$('palmCanvas'),ctx=canvas.getContext('2d'),img=new Image();img.onload=()=>{const maxW=900;const scale=Math.min(1,maxW/img.width);canvas.width=img.width*scale;canvas.height=img.height*scale;ctx.drawImage(img,0,0,canvas.width,canvas.height);const w=canvas.width,h=canvas.height;ctx.lineWidth=Math.max(4,w*.009);ctx.lineCap='round';function curve(color,pts){ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(pts[0][0]*w,pts[0][1]*h);for(let i=1;i<pts.length-1;i++){ctx.quadraticCurveTo(pts[i][0]*w,pts[i][1]*h,pts[i+1][0]*w,pts[i+1][1]*h)}ctx.stroke()}curve('#ef5b5b',[[.24,.47],[.44,.44],[.78,.49]]);curve('#2f8ccf',[[.20,.55],[.43,.52],[.70,.62]]);curve('#2aa66a',[[.30,.62],[.25,.75],[.38,.91]]);curve('#f2a71b',[[.55,.42],[.56,.58],[.56,.82]]);curve('#8b4bd6',[[.61,.55],[.60,.68],[.60,.86]]);[[1,.47,.49,'#ef5b5b'],[2,.22,.56,'#2f8ccf'],[3,.34,.73,'#2aa66a'],[4,.78,.49,'#f2a71b'],[5,.60,.69,'#8b4bd6']].forEach(([n,x,y,c])=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x*w,y*h,Math.max(14,w*.032),0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font=`bold ${Math.max(16,w*.035)}px Inter`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n,x*w,y*h)});};img.src=state.right||state.left;}
@@ -85,42 +45,48 @@ function renderScores(scores={}){const colors=['#ef5b5b','#2aa66a','#2f8ccf','#8
 function renderTimeline(arr=[]){$('timeline').innerHTML=arr.slice(0,3).map(t=>`<div class="timebox"><h3>${t.age||''}</h3><p>${t.text||''}</p><small><b>Зөвлөмж</b><br>${t.advice||''}</small></div>`).join('')}
 function renderSections(arr=[],summary=''){let html=summary?`<article class="section report-page"><h2>Ерөнхий дүгнэлт</h2><p>${summary}</p></article>`:'';html+=arr.map(s=>`<article class="section report-page"><h2>${s.title}</h2><p>${s.body}</p></article>`).join('');$('sections').innerHTML=html;}
 function showError(msg){$('error').style.display='block';$('error').textContent=msg}function hideError(){$('error').style.display='none'}function resetApp(){location.reload()}
+
 async function downloadPDF(){
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF('p','mm','a4');
+  const pageW=210, pageH=297;
   const report=$('report');
-  if(!report){showError('PDF үүсгэх тайлан олдсонгүй');return;}
-  const oldText=document.querySelector('.result-actions');
-  if(oldText) oldText.style.display='none';
+  const meta=$('meta')?.textContent || '';
+  const pages=[];
+  const makePage=(title, nodes, extraClass='')=>{
+    const page=document.createElement('div');
+    page.className='pdf-build-page '+extraClass;
+    const content=document.createElement('div');
+    content.className='pdf-content';
+    if(title){const h=document.createElement('div');h.className='pdf-title';h.textContent=title;content.appendChild(h);}
+    nodes.forEach(n=>content.appendChild(n.cloneNode(true)));
+    const foot=document.createElement('div');
+    foot.className='pdf-footer';
+    foot.innerHTML='<span>Системийн зохиогч: Л.Батцог</span><span></span>';
+    page.appendChild(content); page.appendChild(foot);
+    document.body.appendChild(page); pages.push(page);
+  };
+  const cover=document.createElement('div');
+  cover.className='pdf-build-page';
+  cover.innerHTML=`<div class="pdf-cover"><h1>Хувь Тавилангийн Хээ</h1><img src="sara.jpg"><p>Сарагийн алганы хээний дэлгэрэнгүй тайлан</p><p>${meta}</p></div><div class="pdf-footer"><span>Системийн зохиогч: Л.Батцог</span><span>Нүүр</span></div>`;
+  document.body.appendChild(cover); pages.push(cover);
+  const palm=document.querySelector('.palm-card'); if(palm) makePage('Алганы шугамын зураглал',[palm]);
+  const score=document.querySelector('.score-card'); if(score) makePage('Ерөнхий төлөвийн оноо',[score]);
+  const timeline=document.querySelector('.timeline-card'); if(timeline) makePage('Амьдралын үе шат',[timeline]);
+  document.querySelectorAll('#sections .section').forEach(sec=>makePage('',[sec]));
+  const quote=$('quote'); if(quote) makePage('Сарагийн үг',[quote]);
   try{
-    const canvas=await html2canvas(report,{scale:1.35,useCORS:true,allowTaint:true,backgroundColor:'#faf8f4',scrollX:0,scrollY:0,windowWidth:report.scrollWidth,windowHeight:report.scrollHeight});
-    const img=canvas.toDataURL('image/jpeg',0.92);
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF('p','mm','a4');
-    const pageW=210;
-    const pageH=297;
-    const margin=0;
-    const imgW=pageW-(margin*2);
-    const imgH=canvas.height*imgW/canvas.width;
-    let y=margin;
-    pdf.addImage(img,'JPEG',margin,y,imgW,imgH);
-    let remaining=imgH-pageH;
-    while(remaining>0){
-      y-=pageH;
-      pdf.addPage();
-      pdf.addImage(img,'JPEG',margin,y,imgW,imgH);
-      remaining-=pageH;
+    for(let i=0;i<pages.length;i++){
+      pages[i].querySelector('.pdf-footer span:last-child').textContent=(i+1)+' / '+pages.length;
+      const canvas=await html2canvas(pages[i],{scale:1.6,useCORS:true,backgroundColor:'#fffdf9',logging:false});
+      const img=canvas.toDataURL('image/jpeg',0.92);
+      if(i>0) pdf.addPage();
+      pdf.addImage(img,'JPEG',0,0,pageW,pageH,undefined,'FAST');
     }
-    const total=pdf.getNumberOfPages();
-    for(let i=1;i<=total;i++){
-      pdf.setPage(i);
-      pdf.setFontSize(8);
-      pdf.setTextColor(120,120,120);
-      pdf.text(`Системийн зохиогч: Л.Батцог · ${i}/${total}`,105,292,{align:'center'});
-    }
-    pdf.save('sara-palm-report.pdf');
-  }catch(e){
-    showError('PDF үүсгэхэд алдаа гарлаа: '+e.message);
+    const filename=(($('name')?.value||'sara').trim()||'sara').replace(/[\/:*?"<>|]/g,'')+'-palm-report.pdf';
+    pdf.save(filename);
   }finally{
-    if(oldText) oldText.style.display='flex';
+    pages.forEach(p=>p.remove());
   }
 }
 
