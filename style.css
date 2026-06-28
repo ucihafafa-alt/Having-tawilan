@@ -19,3 +19,98 @@
   z-index:5;
 }
 .form-card{padding-bottom:28px;}
+
+
+/* PDF / Print preview fix */
+@page{
+  size:A4;
+  margin:12mm;
+}
+.report{
+  width:100%;
+  max-width:1050px;
+  margin:0 auto;
+}
+.meta{
+  font-weight:600;
+  line-height:1.7;
+}
+.report-page{
+  break-before:page;
+  page-break-before:always;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.sections{
+  display:block;
+}
+.sections .section{
+  margin-bottom:18px;
+}
+@media print{
+  html,body{
+    width:210mm;
+    min-height:297mm;
+    background:#faf8f4 !important;
+    overflow:visible !important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  body:before,.side,.result-actions,#start,#loading{
+    display:none !important;
+  }
+  .app-shell,.main,.panel.active{
+    display:block !important;
+    min-height:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    width:100% !important;
+  }
+  #result{
+    display:block !important;
+  }
+  .report{
+    width:186mm !important;
+    max-width:186mm !important;
+    margin:0 auto !important;
+    background:#faf8f4 !important;
+  }
+  .report-head,.palm-card,.score-card,.timeline-card,.section,blockquote,.footer{
+    box-shadow:none !important;
+  }
+  .report-head{
+    break-after:avoid;
+    page-break-after:avoid;
+  }
+  .palm-card,.score-card,.timeline-card{
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+  .palm-card{
+    display:block !important;
+  }
+  #palmCanvas{
+    max-height:130mm !important;
+  }
+  .scores,.timeline{
+    grid-template-columns:1fr 1fr !important;
+  }
+  .sections{
+    display:block !important;
+  }
+  .sections .section{
+    min-height:245mm;
+    margin:0 0 12mm 0 !important;
+    display:block;
+  }
+  .sections .section h2{
+    font-size:28px !important;
+  }
+  .sections .section p{
+    font-size:15px !important;
+    line-height:1.85 !important;
+  }
+  button{
+    display:none !important;
+  }
+}
