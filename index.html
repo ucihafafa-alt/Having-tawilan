@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FAF8F4">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Хувь Тавилангийн Хээ — Сара</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="side">
+    <div class="flower"></div>
+    <div class="logo-mark">♡</div>
+    <div class="script">Сара</div>
+    <p class="role">Алганы хээний<br>шинжээч</p>
+    <img src="sara.jpg" class="sara" alt="Сара">
+    <h3>Сара</h3>
+    <p class="sub">Алганы хээ шинжээч</p>
+    <span class="online">● Онлайн</span>
+    <nav>
+      <a class="active">⌂ Ерөнхий дүр зураг</a>
+      <a>◷ Амьдралын үе шат</a>
+      <a>♡ Хайр дурлал</a>
+      <a>▣ Ажил мэргэжил</a>
+      <a>◉ Мөнгө санхүү</a>
+      <a>♧ Эрүүл мэнд</a>
+      <a>✧ 3 жилийн төлөв</a>
+      <a>▤ PDF тайлан</a>
+    </nav>
+    <div class="privacy">Таны мэдээлэл зөвхөн тайлан үүсгэхэд ашиглагдана.</div>
+  </aside>
+
+  <main class="main">
+    <section id="start" class="panel active">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">AI Palm Report</p>
+          <h1>Таны алганы хээний<br><span>дэлгэрэнгүй тайлал</span></h1>
+          <p class="lead">Өөрийн гарын зургийг оруулаад, өнгөт шугамтай тайлбар болон PDF тайлангаа гаргана.</p>
+        </div>
+        <button class="ghost" onclick="scrollToForm()">Шинээр эхлэх</button>
+      </header>
+
+      <div class="hero-card">
+        <div class="hero-copy">
+          <h2>Хувь Тавилангийн Хээ</h2>
+          <p>Алганы шугам, хэлбэр, уулс болон гарын бүтцийг нэгтгэн уншиж, амьдралын чиглэл, зан чанар, хайр, ажил, санхүүгийн ерөнхий дүр зургийг тайлбарлана.</p>
+          <div class="chips"><span>Зурагтай тайлбар</span><span>PDF тайлан</span><span>Сарагийн зөвлөгөө</span></div>
+        </div>
+        <img src="sara.jpg" alt="Сара">
+      </div>
+
+      <form id="form" class="form-card" onsubmit="event.preventDefault(); startAnalysis();">
+        <h2>Мэдээллээ оруулна уу</h2>
+        <div class="grid2">
+          <label>Нэр<input id="name" placeholder="Жишээ: Nomi" required></label>
+          <label>Нас<input id="age" type="number" min="12" max="100" placeholder="33" required></label>
+        </div>
+        <label>Хүйс<select id="gender" required><option value="">Сонгоно уу</option><option>Эмэгтэй</option><option>Эрэгтэй</option></select></label>
+        <div class="guide">
+          <b>Зөв зураг авах заавар</b>
+          <span>Алгаа бүтнээр нь харуулна</span><span>Сүүдэргүй, гэрэлтэй байна</span><span>Хуруу тайрагдаагүй байна</span><span>Бүдэг зураг оруулахгүй</span>
+        </div>
+        <div class="upload-grid">
+          <div class="upload-card" id="leftCard">
+            <div class="hand-title">Зүүн гар</div>
+            <img id="leftPrev" class="preview" alt="Зүүн гар">
+            <div class="empty">✋<br>Зураг оруулна уу</div>
+            <input id="leftGallery" type="file" accept="image/*" style="display:none" onchange="loadImage('left',this)">
+            <input id="leftCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="loadImage('left',this)">
+            <div class="upload-actions">
+              <button type="button" onclick="document.getElementById('leftGallery').click()">📁 Галлерей</button>
+              <button type="button" onclick="document.getElementById('leftCamera').click()">📷 Камер</button>
+            </div>
+          </div>
+          <div class="upload-card" id="rightCard">
+            <div class="hand-title">Баруун гар</div>
+            <img id="rightPrev" class="preview" alt="Баруун гар">
+            <div class="empty">🖐<br>Зураг оруулна уу</div>
+            <input id="rightGallery" type="file" accept="image/*" style="display:none" onchange="loadImage('right',this)">
+            <input id="rightCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="loadImage('right',this)">
+            <div class="upload-actions">
+              <button type="button" onclick="document.getElementById('rightGallery').click()">📁 Галлерей</button>
+              <button type="button" onclick="document.getElementById('rightCamera').click()">📷 Камер</button>
+            </div>
+          </div>
+        </div>
+        <button id="analyzeBtn" class="primary" disabled>AI тайлан гаргах</button>
+        <div id="error" class="error"></div>
+      </form>
+    </section>
+
+    <section id="loading" class="panel loading">
+      <div class="pulse-hand">✋</div>
+      <h2>Алганы хээг уншиж байна</h2>
+      <p>Шугам, хэлбэр, уулс, насны мөчлөгийг нэгтгэн боловсруулж байна.</p>
+      <ul class="scan-list">
+        <li class="on">Амьдралын шугам илрүүлж байна</li>
+        <li>Толгойн шугам уншиж байна</li>
+        <li>Зүрхний шугам тайлж байна</li>
+        <li>Мөнгө, ажил, хайр дурлалын хэсгийг боловсруулж байна</li>
+        <li>PDF тайлангийн бүтэц бэлдэж байна</li>
+      </ul>
+    </section>
+
+    <section id="result" class="panel">
+      <div id="report" class="report">
+        <header class="report-head">
+          <div>
+            <p class="eyebrow">Сарагийн тайлан</p>
+            <h1>Таны алганы хээний<br><span>дэлгэрэнгүй тайлал</span></h1>
+            <p id="meta" class="meta"></p>
+          </div>
+          <button class="ghost" onclick="resetApp()">Шинээр эхлэх</button>
+        </header>
+
+        <section class="palm-card">
+          <div class="palm-wrap">
+            <canvas id="palmCanvas"></canvas>
+            <p>AI технологиор үндсэн шугамуудыг өнгөөр тэмдэглэн тайлбарлав.</p>
+          </div>
+          <div class="legend">
+            <div><b class="dot red">1</b><strong>Зүрхний шугам</strong><span id="l1">Хайр, мэдрэмж, харилцааны өнгө аясыг илэрхийлнэ.</span></div>
+            <div><b class="dot blue">2</b><strong>Толгойн шугам</strong><span id="l2">Бодол, шийдвэр, суралцах арга барилыг харуулна.</span></div>
+            <div><b class="dot green">3</b><strong>Амьдралын шугам</strong><span id="l3">Эрч хүч, тэсвэр, амьдралын хэмнэлийг илтгэнэ.</span></div>
+            <div><b class="dot yellow">4</b><strong>Хувь заяаны шугам</strong><span id="l4">Зорилго, ажил, өөрийн зам мөрийн чигийг харуулна.</span></div>
+            <div><b class="dot purple">5</b><strong>Нарны шугам</strong><span id="l5">Авьяас, нэр хүнд, бүтээлч илэрхийллийг илтгэнэ.</span></div>
+          </div>
+        </section>
+
+        <section class="score-card"><h2>Таны ерөнхий төлөвийн оноо</h2><div id="scores" class="scores"></div></section>
+        <section class="timeline-card"><h2>Амьдралын үе шат</h2><div id="timeline" class="timeline"></div></section>
+        <section id="sections" class="sections"></section>
+        <blockquote id="quote">Алганы хээ бол таны өнгөрсөн, одоо, ирээдүйн боломжуудыг тусгасан газрын зураг юм.</blockquote>
+        <footer class="footer"><span>Системийн зохиогч: Л.Батцог</span><span>© 2025 Бүх эрх хуулиар хамгаалагдсан.</span></footer>
+      </div>
+      <div class="result-actions"><button class="primary" onclick="downloadPDF()">PDF тайлан татах</button><button class="ghost" onclick="resetApp()">Дахин шинжлэх</button></div>
+    </section>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
