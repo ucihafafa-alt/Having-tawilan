@@ -1,4 +1,4 @@
-const KEY= 'AIzaSyDpG0QJtE6XfnucaHJPhlJQSgxdLEsbSkg
+const KEY='AIzaSyDpG0QJtE6XfnucaHJPhlJQSgxdLEsbSkg
 const API='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+KEY;
 const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null};
 const $=id=>document.getElementById(id);
