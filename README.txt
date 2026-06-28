@@ -1,10 +1,5 @@
-Хувь Тавилангийн Хээ — Сара v12 real
+Upload all files to the root of your GitHub repository. Do not upload the ZIP itself.
+Enable Settings > Pages > Deploy from branch > main / root.
+Update note: bright clean design, palm line overlay, PDF report, author L.Battsog.
 
-GitHub дээр ZIP-г биш, задлаад гарсан бүх файлыг upload хийнэ.
-Файлууд: index.html, style.css, app.js, manifest.json, sw.js, sara.jpg, icon.png, icon-192.png, README.txt
-
-Gemini API key-г сайт доторх "Gemini API key тохируулах" хэсэгт оруулна. Key GitHub дээр ил харагдахгүй, зөвхөн тухайн browser-ийн localStorage-д хадгалагдана.
-
-PDF: Тайлан гарсны дараа "PDF болгон хадгалах" товч дарж Chrome-ийн Save as PDF ашиглана.
-
-Анхааруулга: гар дээрх өнгөт шугам нь визуал тайлбарын overlay бөгөөд бүрэн автомат бодит шугам илрүүлэгч биш. AI тайлан нь Gemini-д илгээсэн зураг дээр тулгуурлан бичигдэнэ.
+Fix note: Preserved original report logic; fixed Android Gallery/Camera buttons; API key is requested in browser and stored locally instead of being hardcoded.
