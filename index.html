@@ -111,36 +111,69 @@
 
     <section id="result" class="panel">
       <div id="report" class="report">
-        <header class="report-head">
-          <div>
-            <p class="eyebrow">Сарагийн тайлан</p>
-            <h1>Таны алганы хээний<br><span>дэлгэрэнгүй тайлал</span></h1>
-            <p id="meta" class="meta"></p>
+        <section class="report-page cover-page">
+          <img src="icon-192.png" class="page-logo" alt="Лого">
+          <div class="cover-top">
+            <p class="eyebrow" id="coverSystem">Хувь Тавилангийн Хээ</p>
+            <p class="cover-expert" id="coverExpert">Сара — Алганы хээний шинжээч</p>
           </div>
-          <button class="ghost" onclick="resetApp()">Шинээр эхлэх</button>
-        </header>
-
-        <section class="palm-card">
-          <div class="palm-wrap">
-            <canvas id="palmCanvas"></canvas>
-            <p>AI технологиор үндсэн шугамуудыг өнгөөр тэмдэглэн тайлбарлав.</p>
+          <div class="cover-center">
+            <p class="page-kicker">Тайлангийн танилцуулга</p>
+            <h1 class="cover-title">Алганы хээний<br><span>дэлгэрэнгүй тайлан</span></h1>
+            <p class="cover-lead">Үйлчлүүлэгчийн мэдээлэл болон Сарагийн шинжилгээний үндсэн бүтэц.</p>
+            <table class="client-info">
+              <tr><th>Үйлчлүүлэгч</th><td id="coverName"></td></tr>
+              <tr><th>Нас</th><td id="coverAge"></td></tr>
+              <tr><th>Хүйс</th><td id="coverGender"></td></tr>
+              <tr><th>Тайлан гаргасан огноо</th><td id="coverDate"></td></tr>
+            </table>
           </div>
-          <div class="legend">
-            <div><b class="dot red">1</b><strong>Зүрхний шугам</strong><span id="l1">Хайр, мэдрэмж, харилцааны өнгө аясыг илэрхийлнэ.</span></div>
-            <div><b class="dot blue">2</b><strong>Толгойн шугам</strong><span id="l2">Бодол, шийдвэр, суралцах арга барилыг харуулна.</span></div>
-            <div><b class="dot green">3</b><strong>Амьдралын шугам</strong><span id="l3">Эрч хүч, тэсвэр, амьдралын хэмнэлийг илтгэнэ.</span></div>
-            <div><b class="dot yellow">4</b><strong>Хувь заяаны шугам</strong><span id="l4">Зорилго, ажил, өөрийн зам мөрийн чигийг харуулна.</span></div>
-            <div><b class="dot purple">5</b><strong>Нарны шугам</strong><span id="l5">Авьяас, нэр хүнд, бүтээлч илэрхийллийг илтгэнэ.</span></div>
-          </div>
+          <div class="cover-author" id="coverAuthor">Системийн зохиогч: Л.Батцог</div>
         </section>
 
-        <section class="score-card"><h2>Таны ерөнхий төлөвийн оноо</h2><div id="scores" class="scores"></div></section>
-        <section class="timeline-card"><h2>Амьдралын үе шат</h2><div id="timeline" class="timeline"></div></section>
-        <section id="sections" class="sections"></section>
-        <blockquote id="quote">Алганы хээ бол таны өнгөрсөн, одоо, ирээдүйн боломжуудыг тусгасан газрын зураг юм.</blockquote>
-        <footer class="footer"><span>Системийн зохиогч: Л.Батцог</span><span>© 2025 Бүх эрх хуулиар хамгаалагдсан.</span></footer>
+        <section class="report-page map-page">
+          <img src="icon-192.png" class="page-logo" alt="Лого">
+          <p class="page-kicker">Сарагийн тайлан</p>
+          <h2>Алганы үндсэн зураглал</h2>
+          <p id="meta" class="meta"></p>
+          <section class="palm-card">
+            <div class="palm-wrap">
+              <canvas id="palmCanvas"></canvas>
+            </div>
+            <div class="legend">
+              <div><b class="dot red">1</b><strong>Зүрхний шугам</strong><span id="l1">Хайр, мэдрэмж, харилцааны өнгө аясыг илэрхийлнэ.</span></div>
+              <div><b class="dot blue">2</b><strong>Толгойн шугам</strong><span id="l2">Бодол, шийдвэр, суралцах арга барилыг харуулна.</span></div>
+              <div><b class="dot green">3</b><strong>Амьдралын шугам</strong><span id="l3">Эрч хүч, тэсвэр, амьдралын хэмнэлийг илтгэнэ.</span></div>
+              <div><b class="dot yellow">4</b><strong>Хувь заяаны шугам</strong><span id="l4">Зорилго, ажил, өөрийн зам мөрийн чигийг харуулна.</span></div>
+              <div><b class="dot purple">5</b><strong>Нарны шугам</strong><span id="l5">Авьяас, нэр хүнд, бүтээлч илэрхийллийг илтгэнэ.</span></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="report-page score-page">
+          <img src="icon-192.png" class="page-logo" alt="Лого">
+          <p class="page-kicker">Сарагийн тайлан</p>
+          <section class="score-card"><h2>Таны ерөнхий төлөвийн оноо</h2><div id="scores" class="scores"></div></section>
+          <section class="timeline-card"><h2>Амьдралын үе шат</h2><div id="timeline" class="timeline"></div></section>
+        </section>
+
+        <div id="sections" class="sections"></div>
+
+        <section class="report-page final-page">
+          <img src="icon-192.png" class="page-logo" alt="Лого">
+          <p class="page-kicker">Сарагийн тайлан</p>
+          <h2>Төгсгөлийн үг</h2>
+          <blockquote id="quote">Алганы хээ бол таны өнгөрсөн, одоо, ирээдүйн боломжуудыг тусгасан газрын зураг юм.</blockquote>
+          <footer class="footer"><span id="finalAuthor">Системийн зохиогч: Л.Батцог</span><span>© 2026 Бүх эрх хуулиар хамгаалагдсан.</span></footer>
+        </section>
       </div>
-      <div class="result-actions"><button class="primary" onclick="downloadPDF()">PDF болгох</button><button class="ghost" onclick="printReport()">Хэвлэх</button><button class="ghost" onclick="exportWord()">Word хөрвүүлэх</button><button class="ghost" onclick="resetApp()">Дахин шинжлэх</button></div>
+      <div class="result-actions">
+        <button class="primary" onclick="downloadPDF()">PDF тайлан татах</button>
+        <button class="primary" onclick="downloadWord()">Word хөрвүүлэх</button>
+        <button class="ghost" onclick="printReport()">Хэвлэх</button>
+        <button class="ghost" onclick="resetApp()">Дахин шинжлэх</button>
+      </div>
+      <p id="exportStatus" class="export-status"></p>
     </section>
   </main>
 </div>

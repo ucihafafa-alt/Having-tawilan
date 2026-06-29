@@ -1,4 +1,10 @@
 const DEFAULT_KEY='';
+const SYSTEM_NAME='Хувь Тавилангийн Хээ';
+const EXPERT_NAME='Сара';
+const EXPERT_ROLE='Алганы хээний шинжээч';
+const AUTHOR_NAME='Л.Батцог';
+const LOGO_SRC='icon-192.png';
+
 function getApiUrl(){
   let key=localStorage.getItem('GEMINI_API_KEY') || DEFAULT_KEY;
   if(!key){
@@ -9,54 +15,342 @@ function getApiUrl(){
   return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(key.trim());
 }
 
-const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null};
-let currentReport=null;
-let currentMeta={name:'',age:'',gender:'',date:''};
+const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null,lastReport:null,lastClient:null};
 const $=id=>document.getElementById(id);
+const esc=value=>String(value??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const paragraph=value=>esc(value).replace(/\n/g,'<br>');
 
-function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');scrollTo({top:0,behavior:'smooth'});}
+function show(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  scrollTo({top:0,behavior:'smooth'});
+}
 function scrollToForm(){$('form').scrollIntoView({behavior:'smooth'});}
-function loadImage(side,input){const file=input.files[0];if(!file)return;const r=new FileReader();r.onload=e=>{state[side]=e.target.result;state[side+'Data']=e.target.result.split(',')[1];state[side+'Type']=file.type||'image/jpeg';$(side+'Prev').src=e.target.result;$(side+'Card').classList.add('filled');check();};r.readAsDataURL(file);}
-function check(){const ok=state.left&&state.right&&$('name').value&&$('age').value&&$('gender').value;$('analyzeBtn').disabled=!ok;}
-['name','age','gender'].forEach(id=>$(id).addEventListener('input',check));
-function loadingAnim(){let i=0;const items=[...document.querySelectorAll('.scan-list li')];return setInterval(()=>{items.forEach(x=>x.classList.remove('on'));items[Math.min(i,items.length-1)].classList.add('on');i=(i+1)%items.length;},1300)}
-function formatMongolianDate(d=new Date()){return `${d.getFullYear()} оны ${d.getMonth()+1} сарын ${d.getDate()} өдөр`;}
-function buildMeta(name,age,gender){return `${name} / ${gender} / ${age} нас / Тайлан авсан огноо: ${formatMongolianDate()}`;}
-function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[m]));}
+function loadImage(side,input){
+  const file=input.files[0];
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    state[side]=e.target.result;
+    state[side+'Data']=e.target.result.split(',')[1];
+    state[side+'Type']=file.type||'image/jpeg';
+    $(side+'Prev').src=e.target.result;
+    $(side+'Card').classList.add('filled');
+    check();
+  };
+  r.readAsDataURL(file);
+}
+function check(){
+  const ok=state.left&&state.right&&$('name').value&&$('age').value&&$('gender').value;
+  $('analyzeBtn').disabled=!ok;
+}
+['name','age','gender'].forEach(id=>$(id)?.addEventListener('input',check));
 
-const prompt=(name,age,gender)=>`Чи бол Сара нэртэй алганы хээ шинжээч. Монгол хэлээр дулаан, мэргэжлийн, давтагдалгүй тайлан бич. Зураг дээр харагдахгүй зүйлийг баттай мэт зохиохгүй, "ерөнхий ажиглалтаар" гэж болгоомжтой хэл. Хариултыг зөвхөн JSON хэлбэрээр өг. Нэр: ${name}, Нас: ${age}, Хүйс: ${gender}. JSON бүтэц: {"summary":"ерөнхий 5-7 өгүүлбэр", "lineNotes":{"heart":"зүрхний шугамын 2-3 өгүүлбэр", "head":"толгойн шугамын 2-3 өгүүлбэр", "life":"амьдралын шугамын 2-3 өгүүлбэр", "fate":"хувь заяаны шугамын 2-3 өгүүлбэр", "sun":"нарны шугамын 2-3 өгүүлбэр"}, "scores":{"Хайр дурлал":88,"Санхүү":76,"Карьер":82,"Эрүүл мэнд":79,"Тогтвортой байдал":84}, "timeline":[{"age":"Одоо - ${age} нас","text":"...","advice":"..."},{"age":"${Number(age)+1} - ${Number(age)+2} нас","text":"...","advice":"..."},{"age":"${Number(age)+3} - ${Number(age)+4} нас","text":"...","advice":"..."}], "sections":[{"title":"Ерөнхий дүр зураг","body":"180-250 үг"},{"title":"Зан чанар","body":"160-220 үг"},{"title":"Дотоод хүч ба төвлөрөл","body":"140-200 үг"},{"title":"Хайр дурлал","body":"160-220 үг"},{"title":"Ханийн заяа","body":"140-200 үг"},{"title":"Гэр бүл, харилцаа","body":"140-200 үг"},{"title":"Ажил мэргэжил","body":"160-230 үг"},{"title":"Бизнесийн боломж","body":"140-200 үг"},{"title":"Мөнгө санхүү","body":"160-230 үг"},{"title":"Мөнгө тогтоох хандлага","body":"140-200 үг"},{"title":"Эрүүл мэндийн хандлага","body":"Эмнэлгийн онош биш, уламжлалт тайлалын хүрээнд 130-190 үг"},{"title":"Давуу тал","body":"130-190 үг"},{"title":"Сул тал ба анхаарах зүйл","body":"130-190 үг"},{"title":"Аз хийморийн ерөнхий өнгө","body":"130-190 үг"},{"title":"Амьдралын 3 жилийн төлөв","body":"180-260 үг"},{"title":"2026 оны чиглэл","body":"130-190 үг"},{"title":"2027 оны чиглэл","body":"130-190 үг"},{"title":"2028 оны чиглэл","body":"130-190 үг"},{"title":"Сарагийн хувийн зөвлөгөө","body":"160-230 үг"},{"title":"Эцсийн дүгнэлт","body":"160-230 үг"}], "quote":"богино урамтай ишлэл"}`;
+function loadingAnim(){
+  let i=0;
+  const items=[...document.querySelectorAll('.scan-list li')];
+  return setInterval(()=>{
+    items.forEach(x=>x.classList.remove('on'));
+    items[Math.min(i,items.length-1)]?.classList.add('on');
+    i=(i+1)%items.length;
+  },1300);
+}
 
-function parseAiReport(txt,name,age,gender){txt=(txt||'').replace(/```json|```/g,'').trim();try{return JSON.parse(txt)}catch(e){}const first=txt.indexOf('{'), last=txt.lastIndexOf('}');if(first>=0&&last>first){try{return JSON.parse(txt.slice(first,last+1))}catch(e){}}return fallbackReport(name,age,gender,txt);}
+const prompt=(name,age,gender)=>`Чи бол Сара нэртэй алганы хээ шинжээч. Монгол хэлээр дулаан, мэргэжлийн, давтагдалгүй тайлан бич. Зураг дээр харагдахгүй зүйлийг баттай мэт зохиохгүй, "ерөнхий ажиглалтаар" гэж болгоомжтой хэл. Хариултыг зөвхөн JSON хэлбэрээр өг. Нэр: ${name}, Нас: ${age}, Хүйс: ${gender}. JSON бүтэц: {"summary":"ерөнхий 5-7 өгүүлбэр", "lineNotes":{"heart":"зүрхний шугамын 2-3 өгүүлбэр", "head":"толгойн шугамын 2-3 өгүүлбэр", "life":"амьдралын шугамын 2-3 өгүүлбэр", "fate":"хувь заяаны шугамын 2-3 өгүүлбэр", "sun":"нарны шугамын 2-3 өгүүлбэр"}, "scores":{"Хайр дурлал":88,"Санхүү":76,"Карьер":82,"Эрүүл мэнд":79,"Тогтвортой байдал":84}, "timeline":[{"age":"Одоо - ${age} нас","text":"...","advice":"..."},{"age":"${Number(age)+1} - ${Number(age)+2} нас","text":"...","advice":"..."},{"age":"${Number(age)+3} - ${Number(age)+4} нас","text":"...","advice":"..."}], "sections":[{"title":"Ерөнхий дүр зураг","body":"120-170 үг"},{"title":"Зан чанар","body":"120-170 үг"},{"title":"Хайр дурлал","body":"120-170 үг"},{"title":"Ажил мэргэжил","body":"120-170 үг"},{"title":"Мөнгө санхүү","body":"120-170 үг"},{"title":"Эрүүл мэндийн хандлага","body":"Эмнэлгийн онош биш, уламжлалт тайлалын хүрээнд 100-150 үг"},{"title":"Давуу тал","body":"100-150 үг"},{"title":"Анхаарах зүйл","body":"100-150 үг"},{"title":"3 жилийн ерөнхий төлөв","body":"150-200 үг"},{"title":"Сарагийн хувийн зөвлөгөө","body":"120-170 үг"}], "quote":"богино урамтай ишлэл"}`;
 
-async function startAnalysis(){hideError();const name=$('name').value.trim(),age=$('age').value,gender=$('gender').value;show('loading');const timer=loadingAnim();try{const res=await fetch(getApiUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt(name,age,gender)},{inline_data:{mime_type:state.leftType,data:state.leftData}},{inline_data:{mime_type:state.rightType,data:state.rightData}}]}],generationConfig:{temperature:.65,maxOutputTokens:8192,response_mime_type:'application/json'}})});const data=await res.json();if(!res.ok){const msg=data.error?.message||'AI холболтын алдаа';if(msg.toLowerCase().includes('leak')||msg.toLowerCase().includes('api key'))localStorage.removeItem('GEMINI_API_KEY');throw new Error(msg);}let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';let report=parseAiReport(txt,name,age,gender);clearInterval(timer);renderReport(report,name,age,gender);show('result');}catch(e){clearInterval(timer);show('start');showError('Алдаа: '+e.message);}}
+async function startAnalysis(){
+  hideError();
+  const name=$('name').value.trim(),age=$('age').value,gender=$('gender').value;
+  show('loading');
+  const timer=loadingAnim();
+  try{
+    const res=await fetch(getApiUrl(),{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[
+          {text:prompt(name,age,gender)},
+          {inline_data:{mime_type:state.leftType,data:state.leftData}},
+          {inline_data:{mime_type:state.rightType,data:state.rightData}}
+        ]}],
+        generationConfig:{temperature:.65,maxOutputTokens:8192,response_mime_type:'application/json'}
+      })
+    });
+    const data=await res.json();
+    if(!res.ok){
+      const msg=data.error?.message||'AI холболтын алдаа';
+      if(msg.toLowerCase().includes('leak') || msg.toLowerCase().includes('api key')){
+        localStorage.removeItem('GEMINI_API_KEY');
+      }
+      throw new Error(msg);
+    }
+    let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    txt=txt.replace(/```json|```/g,'').trim();
+    let report;
+    try{report=JSON.parse(txt)}catch(e){report=fallbackReport(name,age,gender,txt)}
+    clearInterval(timer);
+    renderReport(report,name,age,gender);
+    show('result');
+  }catch(e){
+    clearInterval(timer);
+    show('start');
+    showError('Алдаа: '+e.message);
+  }
+}
 
-function fallbackReport(name,age,gender,txt){return{summary:txt||`${name} таны алганы ерөнхий хэлбэрээс тогтвортой, бодитой, мэдрэмжтэй зан төлөв ажиглагдаж байна.`,lineNotes:{heart:'Сэтгэлийн илэрхийлэл тогтуун, харилцаанд үнэнч байдлыг эрхэмлэх хандлагатай.',head:'Бодол санаа практик, шийдвэр гаргахдаа ажиглаж тунгаах тал давамгай.',life:'Амьдралын хэмнэл тогтвортой, хүчээ зөв хуваарилах хэрэгтэй.',fate:'Зорилгоо тодруулбал ажил, санхүүгийн зам илүү цэгцтэй болно.',sun:'Авьяас чадвар аажмаар тодрох шинжтэй.'},scores:{'Хайр дурлал':88,'Санхүү':78,'Карьер':84,'Эрүүл мэнд':76,'Тогтвортой байдал':82},timeline:[{age:`Одоо - ${age} нас`,text:'Одоо байгаа сонголтоо цэгцлэх үе.',advice:'Дотоод хүчээ зөв зүйлд чиглүүл.'},{age:`${+age+1} - ${+age+2} нас`,text:'Ажил, санхүү, харилцаанд шинэ боломж нэмэгдэнэ.',advice:'Шинэ төлөвлөгөөнд зоригтой ор.'},{age:`${+age+3} - ${+age+4} нас`,text:'Өмнөх хөдөлмөрийн үр дүн тогтох үе.',advice:'Тогтвортой систем бүтээ.'}],sections:[{title:'Ерөнхий дүр зураг',body:txt||'Таны хоёр гарын ерөнхий хэлбэр, үндсэн шугамуудын байрлал нь бодитой, мэдрэмжтэй, хариуцлагатай хандлагыг илтгэнэ.'},{title:'Сарагийн хувийн зөвлөгөө',body:'Өөрийн замаа яаралгүй, гэхдээ итгэлтэйгээр бүтээ. Төлөвлөгөө, сахилга бат, харилцааны үнэнч байдал таны гол түлхүүр байна.'}],quote:'Алга тань таны замын газрын зураг юм.'}}
+function fallbackReport(name,age,gender,txt){
+  return{
+    summary:txt||`${name} таны алганы ерөнхий хэлбэрээс тогтвортой, бодитой, мэдрэмжтэй зан төлөв ажиглагдаж байна.`,
+    lineNotes:{
+      heart:'Сэтгэлийн илэрхийлэл тогтуун, харилцаанд үнэнч байдлыг эрхэмлэх хандлагатай.',
+      head:'Бодол санаа практик, шийдвэр гаргахдаа ажиглаж тунгаах тал давамгай.',
+      life:'Амьдралын хэмнэл тогтвортой, хүчээ зөв хуваарилах хэрэгтэй.',
+      fate:'Зорилгоо тодруулбал ажил, санхүүгийн зам илүү цэгцтэй болно.',
+      sun:'Авьяас чадвар аажмаар тодрох шинжтэй.'
+    },
+    scores:{'Хайр дурлал':88,'Санхүү':78,'Карьер':84,'Эрүүл мэнд':76,'Тогтвортой байдал':82},
+    timeline:[
+      {age:`Одоо - ${age} нас`,text:'Одоо байгаа сонголтоо цэгцлэх үе.',advice:'Дотоод хүчээ зөв зүйлд чиглүүл.'},
+      {age:`${+age+1} - ${+age+2} нас`,text:'Ажил, санхүү, харилцаанд шинэ боломж нэмэгдэнэ.',advice:'Шинэ төлөвлөгөөнд зоригтой ор.'},
+      {age:`${+age+3} - ${+age+4} нас`,text:'Өмнөх хөдөлмөрийн үр дүн тогтох үе.',advice:'Тогтвортой систем бүтээ.'}
+    ],
+    sections:[
+      {title:'Ерөнхий дүр зураг',body:txt||'Таны хоёр гарын ерөнхий хэлбэр, үндсэн шугамуудын байрлал нь бодитой, мэдрэмжтэй, хариуцлагатай хандлагыг илтгэнэ.'},
+      {title:'Сарагийн хувийн зөвлөгөө',body:'Өөрийн замаа яаралгүй, гэхдээ итгэлтэйгээр бүтээ. Төлөвлөгөө, сахилга бат, харилцааны үнэнч байдал таны гол түлхүүр байна.'}
+    ],
+    quote:'Алга тань таны замын газрын зураг юм.'
+  };
+}
 
-function renderReport(r,name,age,gender){currentReport=r;currentMeta={name,age,gender,date:formatMongolianDate()};$('meta').textContent=buildMeta(name,age,gender);drawPalm();$('l1').textContent=r.lineNotes?.heart||'';$('l2').textContent=r.lineNotes?.head||'';$('l3').textContent=r.lineNotes?.life||'';$('l4').textContent=r.lineNotes?.fate||'';$('l5').textContent=r.lineNotes?.sun||'';renderScores(r.scores);renderTimeline(r.timeline);renderSections(r.sections,r.summary);$('quote').textContent='“'+(r.quote||'Алганы хээ бол таны амьдралын газрын зураг юм.')+'”';}
+function reportDate(){
+  return new Date().toLocaleDateString('mn-MN',{year:'numeric',month:'long',day:'numeric'});
+}
+function setText(id,value){const el=$(id);if(el)el.textContent=value||'';}
+function pageLogo(){return `<img src="${LOGO_SRC}" class="page-logo" alt="Лого">`;}
 
-function drawPalm(){const canvas=$('palmCanvas'),ctx=canvas.getContext('2d'),img=new Image();img.onload=()=>{const maxW=900;const scale=Math.min(1,maxW/img.width);canvas.width=img.width*scale;canvas.height=img.height*scale;ctx.drawImage(img,0,0,canvas.width,canvas.height);const w=canvas.width,h=canvas.height;ctx.lineWidth=Math.max(4,w*.009);ctx.lineCap='round';function curve(color,pts){ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(pts[0][0]*w,pts[0][1]*h);for(let i=1;i<pts.length-1;i++){ctx.quadraticCurveTo(pts[i][0]*w,pts[i][1]*h,pts[i+1][0]*w,pts[i+1][1]*h)}ctx.stroke()}curve('#ef5b5b',[[.24,.47],[.44,.44],[.78,.49]]);curve('#2f8ccf',[[.20,.55],[.43,.52],[.70,.62]]);curve('#2aa66a',[[.30,.62],[.25,.75],[.38,.91]]);curve('#f2a71b',[[.55,.42],[.56,.58],[.56,.82]]);curve('#8b4bd6',[[.61,.55],[.60,.68],[.60,.86]]);[[1,.47,.49,'#ef5b5b'],[2,.22,.56,'#2f8ccf'],[3,.34,.73,'#2aa66a'],[4,.78,.49,'#f2a71b'],[5,.60,.69,'#8b4bd6']].forEach(([n,x,y,c])=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x*w,y*h,Math.max(14,w*.032),0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font=`bold ${Math.max(16,w*.035)}px Inter`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n,x*w,y*h)});};img.src=state.right||state.left;}
-function renderScores(scores={}){const colors=['#ef5b5b','#2aa66a','#2f8ccf','#86c8b0','#f2a71b'];$('scores').innerHTML=Object.entries(scores).slice(0,5).map(([k,v],i)=>`<div class="score"><b>${esc(k)}</b><div class="ring" style="--p:${Number(v)||80};--c:${colors[i]}" data-val="${Number(v)||80}"></div><small>${v>=88?'Маш сайн':v>=75?'Сайн':'Анхаарах'}</small></div>`).join('')}
-function renderTimeline(arr=[]){$('timeline').innerHTML=arr.slice(0,3).map(t=>`<div class="timebox"><h3>${esc(t.age||'')}</h3><p>${esc(t.text||'')}</p><small><b>Зөвлөмж</b><br>${esc(t.advice||'')}</small></div>`).join('')}
-function renderSections(arr=[],summary=''){let html=summary?`<article class="section"><h2>Ерөнхий дүгнэлт</h2><p>${esc(summary)}</p></article>`:'';html+=arr.map(s=>`<article class="section"><h2>${esc(s.title)}</h2><p>${esc(s.body)}</p></article>`).join('');$('sections').innerHTML=html;}
-function showError(msg){$('error').style.display='block';$('error').textContent=msg}function hideError(){$('error').style.display='none'}function resetApp(){location.reload()}
+function renderReport(r,name,age,gender){
+  state.lastReport=r;
+  state.lastClient={name,age,gender,date:reportDate()};
+  setText('meta',`${name} / ${gender} / ${age} нас`);
+  setText('coverName',name);
+  setText('coverAge',`${age} нас`);
+  setText('coverGender',gender);
+  setText('coverDate',state.lastClient.date);
+  setText('coverAuthor',`Системийн зохиогч: ${AUTHOR_NAME}`);
+  setText('coverSystem',SYSTEM_NAME);
+  setText('coverExpert',`${EXPERT_NAME} — ${EXPERT_ROLE}`);
+  drawPalm();
+  setText('l1',r.lineNotes?.heart||'');
+  setText('l2',r.lineNotes?.head||'');
+  setText('l3',r.lineNotes?.life||'');
+  setText('l4',r.lineNotes?.fate||'');
+  setText('l5',r.lineNotes?.sun||'');
+  renderScores(r.scores);
+  renderTimeline(r.timeline);
+  renderSections(r.sections,r.summary);
+  setText('quote','“'+(r.quote||'Алганы хээ бол таны амьдралын газрын зураг юм.')+'”');
+  setText('finalAuthor',`Системийн зохиогч: ${AUTHOR_NAME}`);
+}
 
-function lineNotesHtml(r){const n=r.lineNotes||{};const items=[['1','Зүрхний шугам',n.heart],['2','Толгойн шугам',n.head],['3','Амьдралын шугам',n.life],['4','Хувь заяаны шугам',n.fate],['5','Нарны шугам',n.sun]];return `<div class="line-notes">${items.map(x=>`<div><b>${x[0]}</b><strong>${esc(x[1])}</strong><p>${esc(x[2]||'')}</p></div>`).join('')}</div>`;}
-function scoresHtml(scores={}){return `<div class="pdf-grid">${Object.entries(scores).slice(0,5).map(([k,v])=>`<div class="mini"><b>${esc(k)}</b><p>${Number(v)||80}%</p><small>${v>=88?'Маш сайн':v>=75?'Сайн':'Анхаарах'}</small></div>`).join('')}</div>`;}
-function timelineHtml(arr=[]){return `<div>${arr.slice(0,3).map(t=>`<div class="box"><h3>${esc(t.age||'')}</h3><p>${esc(t.text||'')}</p><small><b>Зөвлөмж:</b> ${esc(t.advice||'')}</small></div>`).join('')}</div>`;}
-function getPalmImage(){const c=$('palmCanvas');try{return c&&c.width?c.toDataURL('image/jpeg',0.92):(state.right||state.left||'');}catch(e){return state.right||state.left||'';}}
-function buildPrintDocument(){const r=currentReport||fallbackReport(currentMeta.name||'',currentMeta.age||'',currentMeta.gender||'','');const m=currentMeta;const palmImg=getPalmImage();const pages=[];function page(title,body,cls=''){pages.push(`<section class="page ${cls}">${title?`<h2>${esc(title)}</h2>`:''}<div class="page-body">${body}</div><footer><span>Системийн зохиогч: Л.Батцог</span><span></span></footer></section>`)}
-  pages.push(`<section class="page cover"><div class="brand">Сара</div><h1>Хувь Тавилангийн Хээ</h1><p>Алганы хээний дэлгэрэнгүй тайлан</p><div class="client"><h2>Үйлчлүүлэгчийн мэдээлэл</h2><p><b>Нэр:</b> ${esc(m.name)}</p><p><b>Нас:</b> ${esc(m.age)}</p><p><b>Хүйс:</b> ${esc(m.gender)}</p><p><b>Тайлан авсан огноо:</b> ${esc(m.date)}</p></div><footer><span>Сара</span><span>Системийн зохиогч: Л.Батцог</span></footer></section>`);
-  page('Алганы хээний зураглал',`<img class="palm-img" src="${palmImg}"><p class="hint">Нэг гарын зураг дээр үндсэн шугамуудыг өнгөөр тэмдэглэн тайлбарлав.</p>${lineNotesHtml(r)}`,'palm-page');
-  page('Ерөнхий төлөвийн оноо',scoresHtml(r.scores));
-  page('Амьдралын үе шат',timelineHtml(r.timeline));
-  if(r.summary) page('Ерөнхий дүгнэлт',`<p>${esc(r.summary)}</p>`);
-  (r.sections||[]).forEach(s=>page(s.title||'Дэд хэсэг',`<p>${esc(s.body||'')}</p>`));
-  page('Сарагийн үг',`<blockquote>“${esc(r.quote||'Алганы хээ бол таны амьдралын газрын зураг юм.')}”</blockquote>`);
-  const css=`@page{size:A4;margin:14mm}*{box-sizing:border-box}body{margin:0;background:#fffdf9;color:#1f3f3a;font-family:Inter,Arial,sans-serif}.page{width:210mm;min-height:297mm;padding:18mm 16mm 15mm;background:#fffdf9;page-break-after:always;position:relative;overflow:hidden}.page h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;margin:0 0 14px;color:#173f3a}.page p{font-size:15px;line-height:1.75;white-space:pre-line}.cover{display:flex;flex-direction:column;justify-content:center;text-align:center}.cover .brand{position:absolute;top:18mm;left:16mm;font-family:'Cormorant Garamond',serif;font-size:34px;color:#1c7568}.cover h1{font-family:'Cormorant Garamond',serif;font-size:50px;line-height:1;margin:0 0 12px}.client{margin:28px auto 0;text-align:left;border:1px solid #e7e2d9;border-radius:16px;padding:18px 22px;width:75%;background:#fff}.client h2{font-size:24px}.palm-img{width:100%;max-height:135mm;object-fit:contain;border-radius:16px;border:1px solid #e7e2d9;background:#fff}.hint{font-size:13px;color:#71827e;text-align:center}.line-notes{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}.line-notes div,.box,.mini{border:1px solid #e7e2d9;border-radius:14px;padding:12px;background:#fff}.line-notes b{display:inline-grid;place-items:center;background:#1c7568;color:#fff;border-radius:50%;width:26px;height:26px;margin-right:8px}.line-notes strong{font-size:16px}.line-notes p{font-size:13px;margin:6px 0 0}.pdf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini p{font-size:28px;font-weight:800;color:#1c7568;margin:8px 0}.box{margin-bottom:12px}.box h3{margin:0 0 6px;color:#1c7568}blockquote{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;line-height:1.5;background:#edf8f4;border-radius:18px;padding:24px}footer{position:absolute;left:16mm;right:16mm;bottom:10mm;display:flex;justify-content:space-between;color:#71827e;font-size:11px;border-top:1px solid #e7e2d9;padding-top:7px}@media print{.page{page-break-after:always}}`;
-  return `<!doctype html><html lang="mn"><head><meta charset="utf-8"><title>${esc(m.name||'sara')}-palm-report</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"><style>${css}</style></head><body>${pages.join('')}<script>document.querySelectorAll('footer span:last-child').forEach((x,i)=>{if(!x.textContent.includes('Л.Батцог'))x.textContent=(i+1)+' / '+document.querySelectorAll('.page').length});<\/script></body></html>`;}
-function openReportWindow(autoPrint=false){const html=buildPrintDocument();const w=window.open('','_blank');if(!w){alert('Popup нээгдэхгүй байна. Browser permission шалгана уу.');return null;}w.document.open();w.document.write(html);w.document.close();if(autoPrint) setTimeout(()=>{w.focus();w.print();},700);return w;}
-async function downloadPDF(){openReportWindow(true)}
-function printReport(){openReportWindow(true)}
-function exportWord(){const html=buildPrintDocument();const blob=new Blob(['\ufeff',html],{type:'application/msword'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((currentMeta.name||$('name')?.value||'sara').trim()||'sara')+'-palm-report.doc';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000)}
+function drawPalm(){
+  const canvas=$('palmCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=820;
+  canvas.height=760;
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#fffdf9';
+  ctx.fillRect(0,0,w,h);
 
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  ctx.save();
+  ctx.translate(w*.5,h*.56);
+  ctx.strokeStyle='#cbb68c';
+  ctx.fillStyle='#fff8ec';
+  ctx.lineWidth=8;
+  ctx.lineJoin='round';
+  ctx.lineCap='round';
+
+  ctx.beginPath();
+  ctx.moveTo(-155,18);
+  ctx.bezierCurveTo(-184,-104,-179,-237,-139,-242);
+  ctx.bezierCurveTo(-106,-247,-101,-121,-97,-50);
+  ctx.bezierCurveTo(-94,-193,-85,-312,-39,-316);
+  ctx.bezierCurveTo(7,-320,5,-180,7,-53);
+  ctx.bezierCurveTo(22,-201,42,-318,87,-307);
+  ctx.bezierCurveTo(130,-296,104,-169,91,-46);
+  ctx.bezierCurveTo(125,-152,160,-236,198,-217);
+  ctx.bezierCurveTo(238,-198,188,-69,157,24);
+  ctx.bezierCurveTo(210,8,247,28,248,68);
+  ctx.bezierCurveTo(249,113,191,134,155,158);
+  ctx.bezierCurveTo(107,191,79,258,53,324);
+  ctx.lineTo(-115,324);
+  ctx.bezierCurveTo(-132,257,-173,204,-189,147);
+  ctx.bezierCurveTo(-200,109,-184,53,-155,18);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  function curve(color,pts,width=9){
+    ctx.strokeStyle=color;
+    ctx.lineWidth=width;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<pts.length-1;i++)ctx.quadraticCurveTo(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);
+    ctx.stroke();
+  }
+  curve('#ef5b5b',[[-132,-28],[-35,-64],[142,-24]]);
+  curve('#2f8ccf',[[-139,45],[-43,18],[112,78]]);
+  curve('#2aa66a',[[-92,96],[-153,190],[-84,303]]);
+  curve('#f2a71b',[[13,-40],[18,79],[16,263]]);
+  curve('#8b4bd6',[[72,35],[68,136],[58,282]]);
+
+  const markers=[
+    [1,-14,-44,'#ef5b5b'],[2,-131,45,'#2f8ccf'],[3,-111,177,'#2aa66a'],[4,135,-25,'#f2a71b'],[5,66,154,'#8b4bd6']
+  ];
+  markers.forEach(([n,x,y,c])=>{
+    ctx.fillStyle=c;
+    ctx.beginPath();
+    ctx.arc(x,y,25,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.font='bold 28px Inter, Arial';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(n,x,y+1);
+  });
+
+  ctx.restore();
+}
+
+function renderScores(scores={}){
+  const colors=['#ef5b5b','#2aa66a','#2f8ccf','#86c8b0','#f2a71b'];
+  $('scores').innerHTML=Object.entries(scores).slice(0,5).map(([k,v],i)=>{
+    const n=Math.max(0,Math.min(100,Number(v)||80));
+    return `<div class="score"><b>${esc(k)}</b><div class="ring" style="--p:${n};--c:${colors[i]}" data-val="${n}"></div><small>${n>=88?'Маш сайн':n>=75?'Сайн':'Анхаарах'}</small></div>`;
+  }).join('');
+}
+function renderTimeline(arr=[]){
+  $('timeline').innerHTML=arr.slice(0,3).map(t=>`<div class="timebox"><h3>${esc(t.age||'')}</h3><p>${paragraph(t.text||'')}</p><small><b>Зөвлөмж</b><br>${paragraph(t.advice||'')}</small></div>`).join('');
+}
+function splitBody(text,maxWords=190){
+  const words=String(text||'').split(/\s+/).filter(Boolean);
+  if(words.length<=maxWords)return [String(text||'')];
+  const chunks=[];
+  for(let i=0;i<words.length;i+=maxWords)chunks.push(words.slice(i,i+maxWords).join(' '));
+  return chunks;
+}
+function renderSections(arr=[],summary=''){
+  const pages=[];
+  if(summary){
+    pages.push(`<article class="report-page section-page">${pageLogo()}<p class="page-kicker">Сарагийн тайлан</p><h2>Ерөнхий дүгнэлт</h2><p>${paragraph(summary)}</p></article>`);
+  }
+  (arr||[]).forEach(s=>{
+    splitBody(s.body,190).forEach((chunk,idx)=>{
+      const title=idx===0?s.title:`${s.title} — үргэлжлэл`;
+      pages.push(`<article class="report-page section-page">${pageLogo()}<p class="page-kicker">Сарагийн тайлан</p><h2>${esc(title)}</h2><p>${paragraph(chunk)}</p></article>`);
+    });
+  });
+  $('sections').innerHTML=pages.join('');
+}
+function showError(msg){$('error').style.display='block';$('error').textContent=msg;}
+function hideError(){$('error').style.display='none';}
+function resetApp(){location.reload();}
+
+function safeFileName(text){
+  return String(text||'sara').toLowerCase().replace(/[^a-zа-яөүё0-9]+/gi,'-').replace(/^-+|-+$/g,'')||'sara';
+}
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+async function waitImages(root){
+  const imgs=[...root.querySelectorAll('img')];
+  await Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
+}
+function setExportStatus(text){
+  const el=$('exportStatus');
+  if(el)el.textContent=text||'';
+}
+
+async function downloadPDF(){
+  const report=$('report');
+  const pages=[...report.querySelectorAll('.report-page')];
+  if(!pages.length)return;
+  try{
+    setExportStatus('PDF бэлдэж байна...');
+    document.body.classList.add('exporting');
+    await waitImages(report);
+    await wait(80);
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','mm','a4');
+    for(let i=0;i<pages.length;i++){
+      const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#faf8f4',windowWidth:794,windowHeight:1123});
+      const img=canvas.toDataURL('image/jpeg',.94);
+      if(i>0)pdf.addPage();
+      pdf.addImage(img,'JPEG',0,0,210,297,undefined,'FAST');
+    }
+    pdf.save(`${safeFileName(state.lastClient?.name)}-sara-tailan.pdf`);
+  }catch(e){
+    alert('PDF үүсгэхэд алдаа гарлаа: '+e.message);
+  }finally{
+    document.body.classList.remove('exporting');
+    setExportStatus('');
+  }
+}
+
+async function imageToDataURL(url){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{
+      try{
+        const canvas=document.createElement('canvas');
+        canvas.width=img.naturalWidth;
+        canvas.height=img.naturalHeight;
+        canvas.getContext('2d').drawImage(img,0,0);
+        resolve(canvas.toDataURL('image/png'));
+      }catch(e){resolve(url);}
+    };
+    img.onerror=()=>resolve(url);
+    img.src=url;
+  });
+}
+async function downloadWord(){
+  const report=$('report');
+  try{
+    setExportStatus('Word файл бэлдэж байна...');
+    document.body.classList.add('exporting');
+    await waitImages(report);
+    await wait(60);
+    const clone=report.cloneNode(true);
+    const logoData=await imageToDataURL(LOGO_SRC);
+    clone.querySelectorAll('img.page-logo').forEach(img=>img.src=logoData);
+    const originalCanvas=$('palmCanvas');
+    clone.querySelectorAll('canvas').forEach(canvas=>{
+      const image=document.createElement('img');
+      image.src=originalCanvas.toDataURL('image/png');
+      image.className='word-palm-map';
+      image.alt='Ерөнхий гарын зураглал';
+      canvas.replaceWith(image);
+    });
+    const css=`@page WordSection1{size:595.3pt 841.9pt;margin:0} body{font-family:Arial,sans-serif;background:#faf8f4;color:#273b39} .report-page{page:WordSection1;width:595pt;min-height:842pt;box-sizing:border-box;padding:54pt 42pt 42pt;position:relative;page-break-after:always;background:#fffdf9;border:1pt solid #e7e2d9} .page-logo{position:absolute;right:28pt;top:24pt;width:34pt;height:34pt;object-fit:contain}.cover-title{font-size:34pt;line-height:1;color:#173f3a}.cover-author{position:absolute;right:32pt;bottom:28pt;color:#7a6441;font-size:10pt}.client-info{margin-top:26pt;border-collapse:collapse;width:100%}.client-info td{border:1pt solid #e7e2d9;padding:10pt}.palm-card,.score-card,.timeline-card{border:1pt solid #e7e2d9;padding:16pt}.word-palm-map{width:100%;max-height:470pt;object-fit:contain}.legend div,.score,.timebox{border:1pt solid #e7e2d9;padding:10pt;margin:6pt 0}.section-page h2{font-size:24pt;color:#173f3a}.section-page p{font-size:12pt;line-height:1.7}.final-page blockquote{font-size:20pt;color:#315f58}`;
+    const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(SYSTEM_NAME)} — тайлан</title><style>${css}</style></head><body>${clone.innerHTML}</body></html>`;
+    const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
+    const link=document.createElement('a');
+    link.href=URL.createObjectURL(blob);
+    link.download=`${safeFileName(state.lastClient?.name)}-sara-tailan.doc`;
+    document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  }catch(e){
+    alert('Word файл үүсгэхэд алдаа гарлаа: '+e.message);
+  }finally{
+    document.body.classList.remove('exporting');
+    setExportStatus('');
+  }
+}
+function printReport(){
+  setExportStatus('Хэвлэх цонх нээгдэж байна...');
+  setTimeout(()=>{window.print();setExportStatus('');},100);
+}
+
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
