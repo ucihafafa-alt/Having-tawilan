@@ -19,3 +19,7 @@
   z-index:5;
 }
 .form-card{padding-bottom:28px;}
+
+/* Export buttons */
+.result-actions{flex-wrap:wrap}
+.result-actions button{min-width:150px}
