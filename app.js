@@ -5,14 +5,61 @@ const EXPERT_ROLE='Алганы хээний шинжээч';
 const AUTHOR_NAME='Л.Батцог';
 const LOGO_SRC='icon-192.png';
 
-function getApiUrl(){
+const GEMINI_MODELS=[
+  'gemini-2.0-flash',
+  'gemini-2.5-flash',
+  'gemini-1.5-flash'
+];
+
+function getApiKey(){
   let key=localStorage.getItem('GEMINI_API_KEY') || DEFAULT_KEY;
   if(!key){
     key=window.prompt('Gemini API key-гээ оруулна уу');
     if(!key) throw new Error('API key оруулаагүй байна');
     localStorage.setItem('GEMINI_API_KEY', key.trim());
   }
-  return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(key.trim());
+  return key.trim();
+}
+function getApiUrl(model){
+  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(getApiKey())}`;
+}
+function isTransientAiError(message=''){
+  const msg=String(message).toLowerCase();
+  return msg.includes('high demand') || msg.includes('overloaded') || msg.includes('temporar') || msg.includes('try again') || msg.includes('503') || msg.includes('429') || msg.includes('quota');
+}
+async function callGeminiModel(model,payload){
+  const res=await fetch(getApiUrl(model),{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){
+    const msg=data.error?.message || `AI холболтын алдаа (${res.status})`;
+    if(msg.toLowerCase().includes('leak') || msg.toLowerCase().includes('api key')){
+      localStorage.removeItem('GEMINI_API_KEY');
+    }
+    const err=new Error(msg);
+    err.status=res.status;
+    throw err;
+  }
+  return data;
+}
+async function generateWithFallback(payload){
+  const errors=[];
+  for(const model of GEMINI_MODELS){
+    for(let attempt=1;attempt<=2;attempt++){
+      try{
+        const data=await callGeminiModel(model,payload);
+        return {data,model};
+      }catch(e){
+        errors.push(`${model}: ${e.message}`);
+        if(!isTransientAiError(e.message) || attempt===2) break;
+        await wait(1100*attempt);
+      }
+    }
+  }
+  throw new Error('AI сервер түр ачаалалтай байна. 1-2 минутын дараа дахин дараарай. Дэлгэрэнгүй: '+errors.slice(-2).join(' | '));
 }
 
 const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null,lastReport:null,lastClient:null};
@@ -64,26 +111,15 @@ async function startAnalysis(){
   show('loading');
   const timer=loadingAnim();
   try{
-    const res=await fetch(getApiUrl(),{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[
-          {text:prompt(name,age,gender)},
-          {inline_data:{mime_type:state.leftType,data:state.leftData}},
-          {inline_data:{mime_type:state.rightType,data:state.rightData}}
-        ]}],
-        generationConfig:{temperature:.65,maxOutputTokens:8192,response_mime_type:'application/json'}
-      })
-    });
-    const data=await res.json();
-    if(!res.ok){
-      const msg=data.error?.message||'AI холболтын алдаа';
-      if(msg.toLowerCase().includes('leak') || msg.toLowerCase().includes('api key')){
-        localStorage.removeItem('GEMINI_API_KEY');
-      }
-      throw new Error(msg);
-    }
+    const payload={
+      contents:[{parts:[
+        {text:prompt(name,age,gender)},
+        {inline_data:{mime_type:state.leftType,data:state.leftData}},
+        {inline_data:{mime_type:state.rightType,data:state.rightData}}
+      ]}],
+      generationConfig:{temperature:.65,maxOutputTokens:8192,response_mime_type:'application/json'}
+    };
+    const {data}=await generateWithFallback(payload);
     let txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     txt=txt.replace(/```json|```/g,'').trim();
     let report;
@@ -94,7 +130,10 @@ async function startAnalysis(){
   }catch(e){
     clearInterval(timer);
     show('start');
-    showError('Алдаа: '+e.message);
+    const friendly=String(e.message||'').includes('AI сервер түр ачаалалтай')
+      ? e.message
+      : 'Алдаа: '+e.message;
+    showError(friendly);
   }
 }
 
