@@ -42,18 +42,18 @@
         <div>
           <p class="eyebrow">AI Palm Report</p>
           <h1>Таны алганы хээний<br><span>дэлгэрэнгүй тайлал</span></h1>
-          <p class="lead">Өөрийн гарын зургийг оруулаад, өнгөт шугамтай тайлбар болон PDF тайлангаа гаргана.</p>
+          <p class="lead">Өөрийн гарын зургийг оруулаад, мэргэжлийн бүтэцтэй PDF тайлан, Word хувилбар болон хэвлэх сонголттой тайлангаа гаргана.</p>
         </div>
-        <button class="ghost" onclick="scrollToForm()">Шинээр эхлэх</button>
+        <button class="ghost" onclick="scrollToForm()">Шинжилгээ эхлэх</button>
       </header>
 
       <div class="hero-card">
         <div class="hero-copy">
           <h2>Хувь Тавилангийн Хээ</h2>
-          <p>Алганы шугам, хэлбэр, уулс болон гарын бүтцийг нэгтгэн уншиж, амьдралын чиглэл, зан чанар, хайр, ажил, санхүүгийн ерөнхий дүр зургийг тайлбарлана.</p>
-          <div class="chips"><span>Зурагтай тайлбар</span><span>PDF тайлан</span><span>Сарагийн зөвлөгөө</span></div>
+          <p>Алганы хээний үндсэн шугам, хэлбэр, уулс, амьдралын хэмнэл болон зан чанарын илэрхийллийг нэгтгэн уншиж, таны амьдралын чиглэл, хайр, ажил, санхүү, эрүүл мэндийн ерөнхий дүр зургийг тайлбарлана.</p>
+          <div class="chips"><span>Дэлгэрэнгүй тайлан</span><span>PDF • Word • Хэвлэх</span><span>Сарагийн зөвлөгөө</span></div>
         </div>
-        <img src="sara.jpg" alt="Сара">
+        <img src="palm-reading-photo.jpg" alt="Алганы хээ шинжлэх">
       </div>
 
       <form id="form" class="form-card" onsubmit="event.preventDefault(); startAnalysis();">
@@ -65,7 +65,10 @@
         <label>Хүйс<select id="gender" required><option value="">Сонгоно уу</option><option>Эмэгтэй</option><option>Эрэгтэй</option></select></label>
         <div class="guide">
           <b>Зөв зураг авах заавар</b>
-          <span>Алгаа бүтнээр нь харуулна</span><span>Сүүдэргүй, гэрэлтэй байна</span><span>Хуруу тайрагдаагүй байна</span><span>Бүдэг зураг оруулахгүй</span>
+          <span>Алгаа бүтнээр нь харуулна</span>
+          <span>Сүүдэргүй, гэрэлтэй байна</span>
+          <span>Хуруу тайрагдаагүй байна</span>
+          <span>Бүдэг зураг оруулахгүй</span>
         </div>
         <div class="upload-grid">
           <div class="upload-card" id="leftCard">
@@ -120,7 +123,7 @@
           <div class="cover-center">
             <p class="page-kicker">Тайлангийн танилцуулга</p>
             <h1 class="cover-title">Алганы хээний<br><span>дэлгэрэнгүй тайлан</span></h1>
-            <p class="cover-lead">Үйлчлүүлэгчийн мэдээлэл болон Сарагийн шинжилгээний үндсэн бүтэц.</p>
+            <p class="cover-lead">Үйлчлүүлэгчийн мэдээлэл, тайлангийн бүтэц, шинжилгээний үндсэн агуулга.</p>
             <table class="client-info">
               <tr><th>Үйлчлүүлэгч</th><td id="coverName"></td></tr>
               <tr><th>Нас</th><td id="coverAge"></td></tr>
@@ -137,8 +140,9 @@
           <h2>Алганы үндсэн зураглал</h2>
           <p id="meta" class="meta"></p>
           <section class="palm-card">
-            <div class="palm-wrap">
-              <canvas id="palmCanvas"></canvas>
+            <div class="palm-wrap palm-illustration-wrap">
+              <img src="palm-reading-photo.jpg" id="palmMapImage" class="palm-photo" alt="Алганы хээ шинжлэх зураг">
+              <p class="palm-note">Алганы хээ шинжилж буй бэлгэдлийн зураг</p>
             </div>
             <div class="legend">
               <div><b class="dot red">1</b><strong>Зүрхний шугам</strong><span id="l1">Хайр, мэдрэмж, харилцааны өнгө аясыг илэрхийлнэ.</span></div>
