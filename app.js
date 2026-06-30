@@ -85,7 +85,16 @@ async function callModel(model, name, age, gender){
   const data=await res.json().catch(()=>({}));
   if(!res.ok){
     const msg=data.error?.message||'AI холболтын алдаа';
-    if(msg.toLowerCase().includes('api key') || msg.toLowerCase().includes('leak')) localStorage.removeItem('GEMINI_API_KEY');
+    if(
+      msg.toLowerCase().includes('api key') ||
+      msg.toLowerCase().includes('api_key_invalid') ||
+      msg.toLowerCase().includes('key not valid') ||
+      msg.toLowerCase().includes('valid api key') ||
+      msg.toLowerCase().includes('leak')
+    ){
+      localStorage.removeItem('GEMINI_API_KEY');
+      alert('API key хүчингүй байна. Сайтаа дахин нээгээд шинэ key оруулна уу.');
+    }
     throw new Error(msg);
   }
   return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
