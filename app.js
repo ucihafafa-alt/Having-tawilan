@@ -4,12 +4,10 @@ const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rig
 const $=id=>document.getElementById(id);
 
 function getApiKey(){
-  let key=localStorage.getItem('GEMINI_API_KEY') || DEFAULT_KEY;
-  if(!key){
-    key=window.prompt('Gemini API key-гээ оруулна уу');
-    if(!key) throw new Error('API key оруулаагүй байна');
-    localStorage.setItem('GEMINI_API_KEY', key.trim());
-  }
+  localStorage.removeItem('GEMINI_API_KEY');
+  const key = window.prompt('Gemini API key-гээ оруулна уу');
+  if(!key || !key.trim()) throw new Error('API key оруулаагүй байна');
+  localStorage.setItem('GEMINI_API_KEY', key.trim());
   return key.trim();
 }
 function getApiUrl(model){
@@ -93,7 +91,7 @@ async function callModel(model, name, age, gender){
       msg.toLowerCase().includes('leak')
     ){
       localStorage.removeItem('GEMINI_API_KEY');
-      alert('API key хүчингүй байна. Сайтаа дахин нээгээд шинэ key оруулна уу.');
+      alert('API key хүчингүй байна. Дахин AI тайлан гаргах дарахад шинэ key асууна.');
     }
     throw new Error(msg);
   }
