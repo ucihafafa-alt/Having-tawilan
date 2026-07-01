@@ -3,20 +3,21 @@ const DEFAULT_KEY='';
 const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null,lastReport:null,lastClient:null};
 const $=id=>document.getElementById(id);
 
+function cleanKey(k){return String(k||'').trim().replace(/[\s"'`]+/g,'');}
 function askApiKey(){
-  const key = window.prompt('Gemini API key-гээ оруулна уу');
-  if(!key || !key.trim()) throw new Error('API key оруулаагүй байна');
-  localStorage.setItem('GEMINI_API_KEY', key.trim());
-  return key.trim();
+  const key=window.prompt('Gemini API key-гээ оруулна уу');
+  const cleaned=cleanKey(key);
+  if(!cleaned) throw new Error('API key оруулаагүй байна');
+  localStorage.setItem('GEMINI_API_KEY',cleaned);
+  return cleaned;
 }
 function getApiKey(){
-  let key = localStorage.getItem('GEMINI_API_KEY') || DEFAULT_KEY;
-  if(!key || !key.trim()) return askApiKey();
-  return key.trim();
+  const saved=cleanKey(localStorage.getItem('GEMINI_API_KEY')||DEFAULT_KEY);
+  if(!saved) return askApiKey();
+  return saved;
 }
-function getApiUrl(model, forcedKey){
-  const key = forcedKey || getApiKey();
-  return 'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key);
+function getApiUrl(model){
+  return 'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent';
 }
 function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
 function scrollToForm(){$('form').scrollIntoView({behavior:'smooth'});} 
@@ -83,44 +84,35 @@ async function callModel(model, name, age, gender){
     ]}],
     generationConfig:{temperature:.55,maxOutputTokens:8192,response_mime_type:'application/json'}
   };
-
-  async function requestOnce(forcedKey){
-    const res=await fetch(getApiUrl(model, forcedKey),{
+  async function requestOnce(apiKey){
+    const res=await fetch(getApiUrl(model),{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','x-goog-api-key':cleanKey(apiKey)},
       body:JSON.stringify(body)
     });
     const data=await res.json().catch(()=>({}));
     if(!res.ok){
       const msg=data.error?.message||'AI холболтын алдаа';
       const low=msg.toLowerCase();
-      if(
-        low.includes('api key') ||
-        low.includes('api_key_invalid') ||
-        low.includes('key not valid') ||
-        low.includes('valid api key') ||
-        low.includes('leak')
-      ){
+      if(low.includes('api key')||low.includes('api_key_invalid')||low.includes('key not valid')||low.includes('valid api key')||low.includes('leak')){
         localStorage.removeItem('GEMINI_API_KEY');
-        return {invalidKey:true, msg};
+        return {invalidKey:true,msg};
       }
       throw new Error(msg);
     }
     return {text:data.candidates?.[0]?.content?.parts?.[0]?.text||''};
   }
-
-  let first = await requestOnce();
+  let first=await requestOnce(getApiKey());
   if(first.invalidKey){
-    alert('API key хүчингүй байна. Одоо шинэ key оруулна уу.');
-    const newKey = askApiKey();
-    const second = await requestOnce(newKey);
+    alert('API key хүчингүй байна. Одоо шинэ Gemini key-гээ бүтнээр нь paste хийнэ үү.');
+    const second=await requestOnce(askApiKey());
     if(second.invalidKey){
       localStorage.removeItem('GEMINI_API_KEY');
-      throw new Error('Шинэ API key бас хүчингүй байна. AI Studio-оос зөв key аваад дахин оруулна уу.');
+      throw new Error('Шинэ API key бас хүчингүй байна. AI Studio-оос авсан key-г бүтнээр нь copy/paste хийнэ үү.');
     }
-    return second.text || '';
+    return second.text||'';
   }
-  return first.text || '';
+  return first.text||'';
 }
 
 function parseAIResponse(txt){
@@ -333,9 +325,7 @@ function printReport(){
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations()
-    .then(regs=>regs.forEach(r=>r.unregister()))
-    .catch(()=>{});
+  navigator.serviceWorker.getRegistrations().then(regs=>regs.forEach(r=>r.unregister())).catch(()=>{});
 }
 if('caches' in window){
   caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
