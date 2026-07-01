@@ -1,28 +1,37 @@
-const MODEL_CANDIDATES=['gemini-3.5-flash','gemini-2.5-flash'];
+const MODEL_CANDIDATES=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
 const DEFAULT_KEY='';
 const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null,lastReport:null,lastClient:null};
 const $=id=>document.getElementById(id);
 
 function cleanKey(k){
-  return String(k || '').replace(/[^A-Za-z0-9._-]/g,'');
+  return String(k || '').trim().replace(/[^A-Za-z0-9._-]/g,'');
 }
 function askApiKey(){
-  const raw = window.prompt('Gemini AQ auth key-гээ бүтнээр нь paste хийнэ үү');
+  const raw = window.prompt('Gemini API key-гээ бүтнээр нь paste хийнэ үү');
   const cleaned = cleanKey(raw);
   if(!cleaned) throw new Error('API key оруулаагүй байна');
   if(cleaned.length < 20) throw new Error('API key хэт богино байна. Бүтнээр нь copy/paste хийнэ үү.');
-  sessionStorage.setItem('GEMINI_API_KEY', cleaned);
+  localStorage.setItem('GEMINI_API_KEY', cleaned);
+  return cleaned;
+}
+function cleanKey(k){
+  return String(k || '').trim().replace(/[^A-Za-z0-9._-]/g,'');
+}
+function askApiKey(){
+  const raw = window.prompt('Gemini API key-гээ бүтнээр нь paste хийнэ үү');
+  const cleaned = cleanKey(raw);
+  if(!cleaned) throw new Error('API key оруулаагүй байна');
+  if(cleaned.length < 20) throw new Error('API key хэт богино байна. Бүтнээр нь copy/paste хийнэ үү.');
   localStorage.setItem('GEMINI_API_KEY', cleaned);
   return cleaned;
 }
 function getApiKey(){
-  // Force fresh prompt for now so old broken/dirty stored key is never reused
-  sessionStorage.removeItem('GEMINI_API_KEY');
-  localStorage.removeItem('GEMINI_API_KEY');
-  return askApiKey();
+  const saved = cleanKey(localStorage.getItem('GEMINI_API_KEY') || DEFAULT_KEY);
+  if(!saved) return askApiKey();
+  return saved;
 }
 function getApiUrl(model){
-  return 'https://generativelanguage.googleapis.com/v1beta/interactions';
+  return 'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent';
 }
 function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
 function scrollToForm(){$('form').scrollIntoView({behavior:'smooth'});} 
@@ -81,62 +90,54 @@ JSON бүтэц:
 }
 
 async function callModel(model, name, age, gender){
-  const textPrompt = prompt(name,age,gender);
-  const body = {
-    model: model,
-    input: [
-      { text: textPrompt },
-      { inline_data: { mime_type: state.leftType || 'image/jpeg', data: state.leftData } },
-      { inline_data: { mime_type: state.rightType || 'image/jpeg', data: state.rightData } }
-    ],
-    generation_config: { temperature: .55, max_output_tokens: 8192 },
-    response_modalities: ['text']
+  const body={
+    contents:[{parts:[
+      {text:prompt(name,age,gender)},
+      {inline_data:{mime_type:state.leftType||'image/jpeg',data:state.leftData}},
+      {inline_data:{mime_type:state.rightType||'image/jpeg',data:state.rightData}}
+    ]}],
+    generationConfig:{temperature:.55,maxOutputTokens:8192,response_mime_type:'application/json'}
   };
 
   async function requestOnce(apiKey){
     const key = cleanKey(apiKey);
-    const res = await fetch(getApiUrl(model), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': key
+    const res = await fetch(getApiUrl(model),{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-goog-api-key':key
       },
-      body: JSON.stringify(body)
+      body:JSON.stringify(body)
     });
     const data = await res.json().catch(()=>({}));
     if(!res.ok){
       const msg = data.error?.message || data.message || 'AI холболтын алдаа';
       const low = String(msg).toLowerCase();
-      if(low.includes('api key') || low.includes('auth') || low.includes('permission') || low.includes('credential') || low.includes('invalid')){
-        sessionStorage.removeItem('GEMINI_API_KEY');
+      if(
+        low.includes('api key') ||
+        low.includes('api_key_invalid') ||
+        low.includes('key not valid') ||
+        low.includes('valid api key') ||
+        low.includes('credential') ||
+        low.includes('permission') ||
+        low.includes('auth') ||
+        low.includes('invalid')
+      ){
         localStorage.removeItem('GEMINI_API_KEY');
-        return { invalidKey:true, msg };
+        return {invalidKey:true,msg};
       }
       throw new Error(msg);
     }
-    let text = data.output_text || '';
-    if(!text && Array.isArray(data.steps)){
-      for(const step of data.steps){
-        if(step.modelOutput?.content){
-          text += step.modelOutput.content.map(c=>c.text?.text || c.text || '').filter(Boolean).join('\n');
-        }
-        if(step.type === 'model_output' && Array.isArray(step.content)){
-          text += step.content.map(c=>c.text || '').filter(Boolean).join('\n');
-        }
-      }
-    }
-    if(!text && Array.isArray(data.outputs)){
-      text = data.outputs.map(o=>o.text || '').filter(Boolean).join('\n');
-    }
-    return { text: text || '' };
+    return {text:data.candidates?.[0]?.content?.parts?.[0]?.text || ''};
   }
 
   let result = await requestOnce(getApiKey());
   if(result.invalidKey){
-    alert('AQ key хүчингүй байна эсвэл зөвшөөрөлгүй байна. Дахин зөв key оруулна уу.');
+    alert('API key хүчингүй байна. Одоо зөв Gemini key-гээ дахин paste хийнэ үү.');
     result = await requestOnce(askApiKey());
     if(result.invalidKey){
-      throw new Error('AQ key ажилласангүй. AI Studio дээр шинэ key үүсгээд бүтнээр нь copy/paste хийнэ үү.');
+      localStorage.removeItem('GEMINI_API_KEY');
+      throw new Error('API key ажилласангүй. AI Studio дээр шинэ key үүсгээд copy icon-оор бүтнээр нь хуулж оруулна уу.');
     }
   }
   return result.text || '';
