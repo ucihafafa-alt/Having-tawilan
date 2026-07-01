@@ -1,11 +1,11 @@
-const MODEL_CANDIDATES=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
+const MODEL_CANDIDATES=['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-3.5-flash'];
 const DEFAULT_KEY='';
 const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null,lastReport:null,lastClient:null};
 const $=id=>document.getElementById(id);
 
 function cleanKey(k){return String(k||'').trim().replace(/[\s"'`]+/g,'');}
 function askApiKey(){
-  const key=window.prompt('Gemini API key-гээ оруулна уу');
+  const key=window.prompt('Gemini AQ auth key-гээ оруулна уу');
   const cleaned=cleanKey(key);
   if(!cleaned) throw new Error('API key оруулаагүй байна');
   localStorage.setItem('GEMINI_API_KEY',cleaned);
@@ -17,7 +17,7 @@ function getApiKey(){
   return saved;
 }
 function getApiUrl(model){
-  return 'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent';
+  return 'https://generativelanguage.googleapis.com/v1beta/interactions';
 }
 function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
 function scrollToForm(){$('form').scrollIntoView({behavior:'smooth'});} 
@@ -77,38 +77,58 @@ JSON бүтэц:
 
 async function callModel(model, name, age, gender){
   const body={
-    contents:[{parts:[
-      {text:prompt(name,age,gender)},
-      {inline_data:{mime_type:state.leftType,data:state.leftData}},
-      {inline_data:{mime_type:state.rightType,data:state.rightData}}
-    ]}],
-    generationConfig:{temperature:.55,maxOutputTokens:8192,response_mime_type:'application/json'}
+    model:model,
+    input:[
+      {type:'text',text:prompt(name,age,gender)},
+      {type:'image',data:state.leftData,mime_type:state.leftType||'image/jpeg'},
+      {type:'image',data:state.rightData,mime_type:state.rightType||'image/jpeg'}
+    ],
+    generation_config:{temperature:.55,max_output_tokens:8192},
+    response_modalities:['text'],
+    store:false
   };
+
   async function requestOnce(apiKey){
     const res=await fetch(getApiUrl(model),{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-goog-api-key':cleanKey(apiKey)},
+      headers:{
+        'Content-Type':'application/json',
+        'x-goog-api-key':cleanKey(apiKey)
+      },
       body:JSON.stringify(body)
     });
     const data=await res.json().catch(()=>({}));
     if(!res.ok){
-      const msg=data.error?.message||'AI холболтын алдаа';
-      const low=msg.toLowerCase();
-      if(low.includes('api key')||low.includes('api_key_invalid')||low.includes('key not valid')||low.includes('valid api key')||low.includes('leak')){
+      const msg=data.error?.message||data.message||'AI холболтын алдаа';
+      const low=String(msg).toLowerCase();
+      if(low.includes('api key')||low.includes('api_key_invalid')||low.includes('key not valid')||low.includes('valid api key')||low.includes('auth')||low.includes('permission')){
         localStorage.removeItem('GEMINI_API_KEY');
         return {invalidKey:true,msg};
       }
       throw new Error(msg);
     }
-    return {text:data.candidates?.[0]?.content?.parts?.[0]?.text||''};
+    let text='';
+    if(data.output_text) text=data.output_text;
+    if(!text && Array.isArray(data.outputs)){
+      text=data.outputs.map(o=>o.text||'').filter(Boolean).join('\n');
+    }
+    if(!text && Array.isArray(data.steps)){
+      for(const step of data.steps){
+        if(step.type==='model_output' && Array.isArray(step.content)){
+          text += step.content.map(c=>c.text||'').filter(Boolean).join('\n');
+        }
+      }
+    }
+    return {text:text||''};
   }
+
   let first=await requestOnce(getApiKey());
   if(first.invalidKey){
-    alert('API key хүчингүй байна. Одоо шинэ Gemini key-гээ бүтнээр нь paste хийнэ үү.');
+    alert('AQ auth key хүчингүй байна. Одоо шинэ AQ key-гээ бүтнээр нь paste хийнэ үү.');
     const second=await requestOnce(askApiKey());
     if(second.invalidKey){
       localStorage.removeItem('GEMINI_API_KEY');
-      throw new Error('Шинэ API key бас хүчингүй байна. AI Studio-оос авсан key-г бүтнээр нь copy/paste хийнэ үү.');
+      throw new Error('Шинэ AQ key бас хүчингүй байна. AI Studio-оос auth key-г бүтнээр нь copy/paste хийнэ үү.');
     }
     return second.text||'';
   }
