@@ -1,23 +1,18 @@
-const MODEL_CANDIDATES=['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-3.5-flash'];
+const MODEL_CANDIDATES=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
 const DEFAULT_KEY='';
 const state={left:null,right:null,leftType:null,rightType:null,leftData:null,rightData:null,lastReport:null,lastClient:null};
 const $=id=>document.getElementById(id);
 
-function cleanKey(k){return String(k||'').trim().replace(/[\s"'`]+/g,'');}
-function askApiKey(){
-  const key=window.prompt('Gemini AQ auth key-гээ оруулна уу');
-  const cleaned=cleanKey(key);
-  if(!cleaned) throw new Error('API key оруулаагүй байна');
-  localStorage.setItem('GEMINI_API_KEY',cleaned);
-  return cleaned;
-}
 function getApiKey(){
-  const saved=cleanKey(localStorage.getItem('GEMINI_API_KEY')||DEFAULT_KEY);
-  if(!saved) return askApiKey();
-  return saved;
+  localStorage.removeItem('GEMINI_API_KEY');
+  const key = window.prompt('Gemini API key-гээ оруулна уу');
+  if(!key || !key.trim()) throw new Error('API key оруулаагүй байна');
+  localStorage.setItem('GEMINI_API_KEY', key.trim());
+  return key.trim();
 }
 function getApiUrl(model){
-  return 'https://generativelanguage.googleapis.com/v1beta/interactions';
+  const key=getApiKey();
+  return 'https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key);
 }
 function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
 function scrollToForm(){$('form').scrollIntoView({behavior:'smooth'});} 
@@ -77,62 +72,30 @@ JSON бүтэц:
 
 async function callModel(model, name, age, gender){
   const body={
-    model:model,
-    input:[
-      {type:'text',text:prompt(name,age,gender)},
-      {type:'image',data:state.leftData,mime_type:state.leftType||'image/jpeg'},
-      {type:'image',data:state.rightData,mime_type:state.rightType||'image/jpeg'}
-    ],
-    generation_config:{temperature:.55,max_output_tokens:8192},
-    response_modalities:['text'],
-    store:false
+    contents:[{parts:[
+      {text:prompt(name,age,gender)},
+      {inline_data:{mime_type:state.leftType,data:state.leftData}},
+      {inline_data:{mime_type:state.rightType,data:state.rightData}}
+    ]}],
+    generationConfig:{temperature:.55,maxOutputTokens:8192,response_mime_type:'application/json'}
   };
-
-  async function requestOnce(apiKey){
-    const res=await fetch(getApiUrl(model),{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-goog-api-key':cleanKey(apiKey)
-      },
-      body:JSON.stringify(body)
-    });
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok){
-      const msg=data.error?.message||data.message||'AI холболтын алдаа';
-      const low=String(msg).toLowerCase();
-      if(low.includes('api key')||low.includes('api_key_invalid')||low.includes('key not valid')||low.includes('valid api key')||low.includes('auth')||low.includes('permission')){
-        localStorage.removeItem('GEMINI_API_KEY');
-        return {invalidKey:true,msg};
-      }
-      throw new Error(msg);
-    }
-    let text='';
-    if(data.output_text) text=data.output_text;
-    if(!text && Array.isArray(data.outputs)){
-      text=data.outputs.map(o=>o.text||'').filter(Boolean).join('\n');
-    }
-    if(!text && Array.isArray(data.steps)){
-      for(const step of data.steps){
-        if(step.type==='model_output' && Array.isArray(step.content)){
-          text += step.content.map(c=>c.text||'').filter(Boolean).join('\n');
-        }
-      }
-    }
-    return {text:text||''};
-  }
-
-  let first=await requestOnce(getApiKey());
-  if(first.invalidKey){
-    alert('AQ auth key хүчингүй байна. Одоо шинэ AQ key-гээ бүтнээр нь paste хийнэ үү.');
-    const second=await requestOnce(askApiKey());
-    if(second.invalidKey){
+  const res=await fetch(getApiUrl(model),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){
+    const msg=data.error?.message||'AI холболтын алдаа';
+    if(
+      msg.toLowerCase().includes('api key') ||
+      msg.toLowerCase().includes('api_key_invalid') ||
+      msg.toLowerCase().includes('key not valid') ||
+      msg.toLowerCase().includes('valid api key') ||
+      msg.toLowerCase().includes('leak')
+    ){
       localStorage.removeItem('GEMINI_API_KEY');
-      throw new Error('Шинэ AQ key бас хүчингүй байна. AI Studio-оос auth key-г бүтнээр нь copy/paste хийнэ үү.');
+      alert('API key хүчингүй байна. Дахин AI тайлан гаргах дарахад шинэ key асууна.');
     }
-    return second.text||'';
+    throw new Error(msg);
   }
-  return first.text||'';
+  return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
 }
 
 function parseAIResponse(txt){
@@ -344,9 +307,4 @@ function printReport(){
   setTimeout(()=>{w.print();},500);
 }
 
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(regs=>regs.forEach(r=>r.unregister())).catch(()=>{});
-}
-if('caches' in window){
-  caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
-}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
