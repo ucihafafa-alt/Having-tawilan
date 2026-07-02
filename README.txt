@@ -1,8 +1,7 @@
-Upload all files to the root of your GitHub repository. Do not upload the ZIP itself.
-Enable Settings > Pages > Deploy from branch > main / root.
-Update note: bright clean design, palm line overlay, PDF report, author L.Battsog.
-
-Fix note: Preserved original report logic; fixed Android Gallery/Camera buttons; API key is requested in browser and stored locally instead of being hardcoded.
-
-
-Update v46: тайлангийн "Алганы үндсэн зураглал" хэсэгт palm-reading-photo.jpg байршуулсан. JSON алдаа гарсан үед raw тэмдэгт гаргахгүй, цэвэр bullet жагсаалт руу хөрвүүлнэ.
+v47 Gemini API fix
+- Гол алдаа key биш, app.js дотор Gemini API endpoint буруу байсан.
+- Хуучин: /v1beta/interactions + input schema.
+- Шинэ: /v1beta/models/{model}:generateContent + contents.parts schema.
+- Models: gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash fallback.
+- Stored key-ийг бүр мөсөн устгаж дахин дахин нэхдэг логикийг зассан.
+Upload all files to GitHub root. At minimum overwrite app.js and index.html.
