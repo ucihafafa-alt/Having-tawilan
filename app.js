@@ -6,6 +6,12 @@ const $=id=>document.getElementById(id);
 function cleanKey(k){
   return String(k || '').trim().replace(/^['"]|['"]$/g,'').replace(/\s+/g,'');
 }
+function isValidApiKey(k){
+  const key=cleanKey(k);
+  // Gemini API keys are ASCII. Reject copied Mongolian/Cyrillic text or smart punctuation
+  // before it can reach fetch() headers/request options.
+  return /^[A-Za-z0-9_-]{20,}$/.test(key);
+}
 function clearApiKey(){
   sessionStorage.removeItem('GEMINI_API_KEY');
   localStorage.removeItem('GEMINI_API_KEY');
@@ -14,18 +20,24 @@ function askApiKey(){
   const raw = window.prompt('Gemini API key-гээ бүтнээр нь paste хийнэ үү. AI Studio дээрээс авсан key байх ёстой.');
   const cleaned = cleanKey(raw);
   if(!cleaned) throw new Error('API key оруулаагүй байна');
-  if(cleaned.length < 20) throw new Error('API key хэт богино байна. Бүтнээр нь copy/paste хийнэ үү.');
+  if(!isValidApiKey(cleaned)){
+    throw new Error('API key-д зөвшөөрөгдөхгүй тэмдэгт байна. AI Studio дээрх key-гээ зөвхөн латин үсэг, тоо бүхий эх хувиар нь copy/paste хийнэ үү.');
+  }
   sessionStorage.setItem('GEMINI_API_KEY', cleaned);
   localStorage.setItem('GEMINI_API_KEY', cleaned);
   return cleaned;
 }
 function getApiKey(){
   const saved = cleanKey(sessionStorage.getItem('GEMINI_API_KEY') || localStorage.getItem('GEMINI_API_KEY') || DEFAULT_KEY || '');
-  if(saved && saved.length >= 20) return saved;
+  if(saved && isValidApiKey(saved)) return saved;
+  if(saved) clearApiKey();
   return askApiKey();
 }
-function getApiUrl(model){
-  return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+function getApiUrl(model, apiKey=''){
+  const base=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+  // Put the API key in the URL query instead of a request header. This avoids the
+  // browser's ISO-8859-1 header restriction when a malformed/copy-pasted key exists.
+  return apiKey ? `${base}?key=${encodeURIComponent(apiKey)}` : base;
 }
 function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
 function scrollToForm(){$('form').scrollIntoView({behavior:'smooth'});} 
@@ -103,11 +115,14 @@ async function callModel(model, name, age, gender){
 
   async function requestOnce(apiKey){
     const key = cleanKey(apiKey);
-    const res = await fetch(getApiUrl(model), {
+    if(!isValidApiKey(key)){
+      clearApiKey();
+      return { invalidKey:true, msg:'API key буруу тэмдэгттэй байна.' };
+    }
+    const res = await fetch(getApiUrl(model,key), {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': key
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
     });
@@ -227,7 +242,7 @@ async function startAnalysis(){
 
     let report=parseAIResponse(txt);
     if(!report){
-      report=fallbackReport(name,age,gender,txt || lastErr || '');
+      report=fallbackReport(name,age,gender,txt || '');
     }
 
     state.lastReport=report; state.lastClient={name,age,gender};
@@ -239,7 +254,7 @@ async function startAnalysis(){
     }
   }catch(e){
     clearInterval(timer);
-    const report=fallbackReport(name,age,gender,e.message||'');
+    const report=fallbackReport(name,age,gender,'');
     state.lastReport=report; state.lastClient={name,age,gender};
     renderReport(report,name,age,gender);
     show('result');
@@ -376,4 +391,4 @@ if('caches' in window){
   caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
 }
 
-// v47 Gemini API fix: uses /v1beta/models/{model}:generateContent with contents.parts and x-goog-api-key.
+// v48 Gemini API fix: validates ASCII API keys, sends the key via ?key=, and never renders technical fetch errors into reports.
