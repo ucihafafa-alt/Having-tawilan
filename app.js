@@ -318,13 +318,22 @@ function showError(msg){$('error').style.display='block';$('error').textContent=
 function hideError(){$('error').style.display='none'}
 function setStatus(msg){$('exportStatus').textContent=msg||'';}
 function resetApp(){location.reload()}
-function reportFileBase(){const name=(state.lastClient?.name||'sara-tailan').trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-zа-яёөүң-]+/gi,'');return name||'sara-tailan';}
+function reportFileBase(){return 'sara-tailan';}
+function safePdfName(){return `${reportFileBase()}-${new Date().toISOString().slice(0,10)}.pdf`;}
+function triggerDownload(blob, filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename; a.rel='noopener';
+  a.style.display='none'; document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{a.remove(); URL.revokeObjectURL(url);},15000);
+}
 
 async function capturePages(){
   const pages=[...document.querySelectorAll('#report .report-page')];
   const results=[];
   for(const page of pages){
-    const canvas=await html2canvas(page,{scale:2,useCORS:true,backgroundColor:'#f7f3ec',windowWidth:1240});
+    const canvas=await html2canvas(page,{scale:1.25,useCORS:true,allowTaint:false,backgroundColor:'#f7f3ec',windowWidth:1240,logging:false});
     results.push(canvas);
   }
   return results;
@@ -332,17 +341,28 @@ async function capturePages(){
 
 async function downloadPDF(){
   try{
+    hideError();
     setStatus('PDF бэлтгэж байна...');
+    if(!window.html2canvas || !window.jspdf?.jsPDF){
+      throw new Error('PDF сан ачаалагдсангүй. Интернэт холболтоо шалгаад хуудсаа дахин нээнэ үү.');
+    }
     const pages=await capturePages();
-    const {jsPDF}=window.jspdf; const pdf=new jsPDF('p','mm','a4');
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});
     pages.forEach((canvas,i)=>{
-      if(i>0) pdf.addPage();
-      const img=canvas.toDataURL('image/jpeg',0.95);
-      pdf.addImage(img,'JPEG',0,0,210,297);
+      if(i>0) pdf.addPage('a4','p');
+      const img=canvas.toDataURL('image/jpeg',0.78);
+      pdf.addImage(img,'JPEG',0,0,210,297,undefined,'FAST');
     });
-    pdf.save(`${reportFileBase()}-sara-tailan.pdf`);
-    setStatus('PDF тайлан амжилттай бэлэн боллоо.');
-  }catch(e){ setStatus('PDF гаргахад алдаа гарлаа.'); }
+    const blob=pdf.output('blob');
+    if(!blob || blob.size<1000) throw new Error('PDF файл хоосон үүссэн байна.');
+    triggerDownload(blob,safePdfName());
+    setStatus(`PDF бэлэн боллоо (${Math.round(blob.size/1024)} KB). Таталт эхэлнэ.`);
+  }catch(e){
+    console.error('PDF ERROR:',e);
+    setStatus('PDF татахад алдаа гарлаа.');
+    showError('PDF татахад алдаа гарлаа: '+(e?.message||e));
+  }
 }
 
 function buildDocHtml(){
@@ -391,4 +411,4 @@ if('caches' in window){
   caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
 }
 
-// v48 Gemini API fix: validates ASCII API keys, sends the key via ?key=, and never renders technical fetch errors into reports.
+// v49: Gemini API header fix + mobile-safe PDF Blob download and smaller PDF memory footprint.
